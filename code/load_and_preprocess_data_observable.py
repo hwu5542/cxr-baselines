@@ -1,4 +1,5 @@
 import os
+import re
 import zipfile
 import pandas as pd
 from pydicom import dcmread
@@ -70,11 +71,13 @@ class ObservableDataProcessor:
         for patient_dir in tqdm(Path(base_path).glob("P*/p*"), desc="Patients"):
             patient_id = patient_dir.name[1:]
             
-            for study_dir in patient_dir.glob("s*"):
+            for study_dir in patient_dir.glob("s[!.]*"):
                 study_id = study_dir.name[1:]
                 dicom_files = list(study_dir.glob("*.dcm"))
                 report_path = Path(reports_folder) / patient_dir.parent.name / patient_dir.name / f"{study_dir.name}.txt"
                 
+                # print(patient_id, study_id, dicom_files, report_path)
+                # return
                 if report_path.exists():
                     for dicom_path in dicom_files:
                         records.append({
@@ -112,7 +115,7 @@ class ObservableDataProcessor:
                 })
                 self.processed_count += 1
                 
-                if self.processed_count % 100 == 0:
+                if self.processed_count % 2000 == 0:
                     self.log_progress(f"Processed {self.processed_count} items")
                     
             except Exception as e:
@@ -141,17 +144,32 @@ class ObservableDataProcessor:
         return train_df, test_df
 
     def save_to_parquet(self, df, output_path):
-        """Save data with progress tracking"""
         self.current_stage = "Saving Data"
         self.log_progress(f"Saving to {output_path}...")
+        
+        # Convert numpy arrays to bytes
+        df = df.copy()
+        if 'image' in df.columns:
+            df['image'] = df['image'].apply(
+                lambda x: x.tobytes() if isinstance(x, np.ndarray) else x
+            )
+        
         df.to_parquet(output_path)
         self.log_progress(f"Saved {len(df)} items to {output_path}")
 
     def load_from_parquet(self, file_path):
-        """Load data with progress tracking"""
         self.current_stage = "Loading Data"
         self.log_progress(f"Loading from {file_path}...")
+        
         df = pd.read_parquet(file_path)
+        
+        # Convert bytes back to numpy arrays
+        if 'image' in df.columns:
+            df['image'] = df['image'].apply(
+                lambda x: np.frombuffer(x, dtype=np.float32).reshape(224, 224) 
+                if isinstance(x, bytes) else x
+            )
+        
         self.log_progress(f"Loaded {len(df)} items from {file_path}")
         return df
 
@@ -161,6 +179,7 @@ if __name__ == "__main__":
     # Path configuration
     REPORTS_ZIP = "D:/mimic/physionet.org/files/mimic-cxr/2.1.0/mimic-cxr-reports.zip"
     REPORTS_FOLDER = "D:/mimic/physionet.org/files/mimic-cxr/2.1.0/reports"
+    FILE_FOLDER = "D:/mimic/physionet.org/files/mimic-cxr/2.1.0/reports/files"
     FILE_PATH = "D:/mimic/physionet.org/files/mimic-cxr/2.1.0/files"
     OUTPUT_DIR = "D:/mimic/processed"
     
@@ -172,7 +191,7 @@ if __name__ == "__main__":
                 zip_ref.extractall(REPORTS_FOLDER)
         
         # Step 2: Build mapping
-        mapping_df = processor.build_mapping(FILE_PATH, REPORTS_FOLDER)
+        mapping_df = processor.build_mapping(FILE_PATH, FILE_FOLDER)
         
         # Step 3: Process data
         processed_data = processor.load_data(mapping_df)

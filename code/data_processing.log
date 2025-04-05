@@ -1,1 +1,159 @@
 2025-04-05 11:58:03,889 - INFO - [Building Mapping] Scanning 65371 patient directories...
+2025-04-05 11:59:35,104 - INFO - [Building Mapping] Built mapping for 0 DICOM-report pairs
+2025-04-05 11:59:35,104 - INFO - [Loading Data] Processing 0 items...
+2025-04-05 11:59:35,104 - INFO - [Loading Data] Completed: 0 successes, 0 errors
+2025-04-05 11:59:35,104 - INFO - [Saving Data] Saving to D:/mimic/processed\processed_data.parquet...
+2025-04-05 11:59:35,304 - ERROR - Processing failed: Cannot save file into a non-existent directory: 'D:\mimic\processed'
+Traceback (most recent call last):
+  File "C:\Work\Bash\sp25_cs598DLH\cxr-baselines\code\load_and_preprocess_data_observable.py", line 181, in <module>
+    processor.save_to_parquet(processed_data, os.path.join(OUTPUT_DIR, "processed_data.parquet"))
+  File "C:\Work\Bash\sp25_cs598DLH\cxr-baselines\code\load_and_preprocess_data_observable.py", line 147, in save_to_parquet
+    df.to_parquet(output_path)
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\site-packages\pandas\util\_decorators.py", line 333, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\site-packages\pandas\core\frame.py", line 3113, in to_parquet
+    return to_parquet(
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\site-packages\pandas\io\parquet.py", line 480, in to_parquet
+    impl.write(
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\site-packages\pandas\io\parquet.py", line 198, in write
+    path_or_handle, handles, filesystem = _get_path_or_handle(
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\site-packages\pandas\io\parquet.py", line 140, in _get_path_or_handle
+    handles = get_handle(
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\site-packages\pandas\io\common.py", line 749, in get_handle
+    check_parent_directory(str(handle))
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\site-packages\pandas\io\common.py", line 616, in check_parent_directory
+    raise OSError(rf"Cannot save file into a non-existent directory: '{parent}'")
+OSError: Cannot save file into a non-existent directory: 'D:\mimic\processed'
+2025-04-05 12:01:44,311 - INFO - [Building Mapping] Scanning 65371 patient directories...
+2025-04-05 12:02:46,755 - INFO - [Building Mapping] Built mapping for 0 DICOM-report pairs
+2025-04-05 12:02:46,755 - INFO - [Loading Data] Processing 0 items...
+2025-04-05 12:02:46,755 - INFO - [Loading Data] Completed: 0 successes, 0 errors
+2025-04-05 12:02:46,755 - INFO - [Saving Data] Saving to D:/mimic/processed\processed_data.parquet...
+2025-04-05 12:02:46,794 - INFO - [Saving Data] Saved 0 items to D:/mimic/processed\processed_data.parquet
+2025-04-05 12:02:46,794 - ERROR - Processing failed: 'patient_id'
+Traceback (most recent call last):
+  File "C:\Work\Bash\sp25_cs598DLH\cxr-baselines\code\load_and_preprocess_data_observable.py", line 182, in <module>
+    train_df, test_df = processor.get_train_test_split(processed_data)
+  File "C:\Work\Bash\sp25_cs598DLH\cxr-baselines\code\load_and_preprocess_data_observable.py", line 129, in get_train_test_split
+    patient_groups = data_df.groupby('patient_id')
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\site-packages\pandas\core\frame.py", line 9183, in groupby
+    return DataFrameGroupBy(
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\site-packages\pandas\core\groupby\groupby.py", line 1329, in __init__
+    grouper, exclusions, obj = get_grouper(
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\site-packages\pandas\core\groupby\grouper.py", line 1043, in get_grouper
+    raise KeyError(gpr)
+KeyError: 'patient_id'
+2025-04-05 15:36:34,205 - INFO - [Building Mapping] Scanning 65371 patient directories...
+2025-04-05 15:36:34,216 - ERROR - Processing failed: local variable 'dicom_path' referenced before assignment
+Traceback (most recent call last):
+  File "C:\Work\Bash\sp25_cs598DLH\cxr-baselines\code\load_and_preprocess_data_observable.py", line 179, in <module>
+    mapping_df = processor.build_mapping(FILE_PATH, REPORTS_FOLDER)
+  File "C:\Work\Bash\sp25_cs598DLH\cxr-baselines\code\load_and_preprocess_data_observable.py", line 78, in build_mapping
+    print(patient_id, study_id, dicom_path, report_path)
+UnboundLocalError: local variable 'dicom_path' referenced before assignment
+2025-04-05 15:37:00,028 - INFO - [Building Mapping] Scanning 65371 patient directories...
+2025-04-05 16:11:05,434 - INFO - [Building Mapping] Scanning 65371 patient directories...
+2025-04-05 16:14:51,870 - INFO - [Building Mapping] Scanning 65371 patient directories...
+2025-04-05 16:14:51,870 - ERROR - Processing failed: object of type 'NoneType' has no len()
+Traceback (most recent call last):
+  File "C:\Work\Bash\sp25_cs598DLH\cxr-baselines\code\load_and_preprocess_data_observable.py", line 181, in <module>
+    processed_data = processor.load_data(mapping_df)
+  File "C:\Work\Bash\sp25_cs598DLH\cxr-baselines\code\load_and_preprocess_data_observable.py", line 100, in load_data
+    self.log_progress(f"Processing {len(df)} items...")
+TypeError: object of type 'NoneType' has no len()
+2025-04-05 16:17:26,525 - INFO - [Building Mapping] Scanning 65371 patient directories...
+2025-04-05 16:19:08,795 - INFO - [Building Mapping] Built mapping for 4951 DICOM-report pairs
+2025-04-05 16:19:08,795 - INFO - [Loading Data] Processing 4951 items...
+2025-04-05 16:19:15,502 - INFO - [Loading Data] Processed 100 items
+2025-04-05 16:19:22,141 - INFO - [Loading Data] Processed 200 items
+2025-04-05 16:19:28,911 - INFO - [Loading Data] Processed 300 items
+2025-04-05 16:19:35,699 - INFO - [Loading Data] Processed 400 items
+2025-04-05 16:19:42,437 - INFO - [Loading Data] Processed 500 items
+2025-04-05 16:19:49,089 - INFO - [Loading Data] Processed 600 items
+2025-04-05 16:19:55,669 - INFO - [Loading Data] Processed 700 items
+2025-04-05 16:20:02,608 - INFO - [Loading Data] Processed 800 items
+2025-04-05 16:20:09,655 - INFO - [Loading Data] Processed 900 items
+2025-04-05 16:20:16,926 - INFO - [Loading Data] Processed 1000 items
+2025-04-05 16:20:23,852 - INFO - [Loading Data] Processed 1100 items
+2025-04-05 16:20:30,945 - INFO - [Loading Data] Processed 1200 items
+2025-04-05 16:20:37,634 - INFO - [Loading Data] Processed 1300 items
+2025-04-05 16:20:44,518 - INFO - [Loading Data] Processed 1400 items
+2025-04-05 16:20:51,529 - INFO - [Loading Data] Processed 1500 items
+2025-04-05 16:20:58,253 - INFO - [Loading Data] Processed 1600 items
+2025-04-05 16:21:05,086 - INFO - [Loading Data] Processed 1700 items
+2025-04-05 16:21:11,611 - INFO - [Loading Data] Processed 1800 items
+2025-04-05 16:21:18,143 - INFO - [Loading Data] Processed 1900 items
+2025-04-05 16:21:24,579 - INFO - [Loading Data] Processed 2000 items
+2025-04-05 16:21:31,219 - INFO - [Loading Data] Processed 2100 items
+2025-04-05 16:21:37,940 - INFO - [Loading Data] Processed 2200 items
+2025-04-05 16:21:45,006 - INFO - [Loading Data] Processed 2300 items
+2025-04-05 16:21:51,540 - INFO - [Loading Data] Processed 2400 items
+2025-04-05 16:21:58,407 - INFO - [Loading Data] Processed 2500 items
+2025-04-05 16:22:05,180 - INFO - [Loading Data] Processed 2600 items
+2025-04-05 16:22:11,869 - INFO - [Loading Data] Processed 2700 items
+2025-04-05 16:22:18,690 - INFO - [Loading Data] Processed 2800 items
+2025-04-05 16:22:26,209 - INFO - [Loading Data] Processed 2900 items
+2025-04-05 16:22:33,362 - INFO - [Loading Data] Processed 3000 items
+2025-04-05 16:22:40,357 - INFO - [Loading Data] Processed 3100 items
+2025-04-05 16:22:46,974 - INFO - [Loading Data] Processed 3200 items
+2025-04-05 16:22:53,808 - INFO - [Loading Data] Processed 3300 items
+2025-04-05 16:23:00,725 - INFO - [Loading Data] Processed 3400 items
+2025-04-05 16:23:07,558 - INFO - [Loading Data] Processed 3500 items
+2025-04-05 16:23:14,041 - INFO - [Loading Data] Processed 3600 items
+2025-04-05 16:23:20,989 - INFO - [Loading Data] Processed 3700 items
+2025-04-05 16:23:27,624 - INFO - [Loading Data] Processed 3800 items
+2025-04-05 16:23:34,724 - INFO - [Loading Data] Processed 3900 items
+2025-04-05 16:23:41,412 - INFO - [Loading Data] Processed 4000 items
+2025-04-05 16:23:48,824 - INFO - [Loading Data] Processed 4100 items
+2025-04-05 16:23:55,641 - INFO - [Loading Data] Processed 4200 items
+2025-04-05 16:24:02,991 - INFO - [Loading Data] Processed 4300 items
+2025-04-05 16:24:09,859 - INFO - [Loading Data] Processed 4400 items
+2025-04-05 16:24:16,565 - INFO - [Loading Data] Processed 4500 items
+2025-04-05 16:24:23,027 - INFO - [Loading Data] Processed 4600 items
+2025-04-05 16:24:29,491 - INFO - [Loading Data] Processed 4700 items
+2025-04-05 16:24:35,891 - INFO - [Loading Data] Processed 4800 items
+2025-04-05 16:24:42,375 - INFO - [Loading Data] Processed 4900 items
+2025-04-05 16:24:45,591 - INFO - [Loading Data] Completed: 4951 successes, 0 errors
+2025-04-05 16:24:45,591 - INFO - [Saving Data] Saving to D:/mimic/processed\processed_data.parquet...
+2025-04-05 16:24:45,808 - ERROR - Processing failed: ('Can only convert 1-dimensional array values', 'Conversion failed for column image with type object')
+Traceback (most recent call last):
+  File "C:\Work\Bash\sp25_cs598DLH\cxr-baselines\code\load_and_preprocess_data_observable.py", line 185, in <module>
+    processor.save_to_parquet(processed_data, os.path.join(OUTPUT_DIR, "processed_data.parquet"))
+  File "C:\Work\Bash\sp25_cs598DLH\cxr-baselines\code\load_and_preprocess_data_observable.py", line 150, in save_to_parquet
+    df.to_parquet(output_path)
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\site-packages\pandas\util\_decorators.py", line 333, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\site-packages\pandas\core\frame.py", line 3113, in to_parquet
+    return to_parquet(
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\site-packages\pandas\io\parquet.py", line 480, in to_parquet
+    impl.write(
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\site-packages\pandas\io\parquet.py", line 190, in write
+    table = self.api.Table.from_pandas(df, **from_pandas_kwargs)
+  File "pyarrow\\table.pxi", line 4751, in pyarrow.lib.Table.from_pandas
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\site-packages\pyarrow\pandas_compat.py", line 652, in dataframe_to_arrays
+    arrays[i] = maybe_fut.result()
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\concurrent\futures\_base.py", line 439, in result
+    return self.__get_result()
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\concurrent\futures\_base.py", line 391, in __get_result
+    raise self._exception
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\site-packages\pyarrow\pandas_compat.py", line 626, in convert_column
+    raise e
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\site-packages\pyarrow\pandas_compat.py", line 620, in convert_column
+    result = pa.array(col, type=type_, from_pandas=True, safe=safe)
+  File "pyarrow\\array.pxi", line 362, in pyarrow.lib.array
+  File "pyarrow\\array.pxi", line 87, in pyarrow.lib._ndarray_to_array
+  File "pyarrow\\error.pxi", line 92, in pyarrow.lib.check_status
+pyarrow.lib.ArrowInvalid: ('Can only convert 1-dimensional array values', 'Conversion failed for column image with type object')
+2025-04-05 16:58:04,285 - INFO - [Building Mapping] Scanning 65371 patient directories...
+2025-04-05 16:59:59,454 - INFO - [Building Mapping] Built mapping for 5024 DICOM-report pairs
+2025-04-05 16:59:59,461 - INFO - [Loading Data] Processing 5024 items...
+2025-04-05 17:01:56,111 - INFO - [Loading Data] Processed 2000 items
+2025-04-05 17:03:53,250 - INFO - [Loading Data] Processed 4000 items
+2025-04-05 17:04:54,978 - INFO - [Loading Data] Completed: 5024 successes, 0 errors
+2025-04-05 17:04:54,985 - INFO - [Saving Data] Saving to D:/mimic/processed\processed_data.parquet...
+2025-04-05 17:05:00,969 - INFO - [Saving Data] Saved 5024 items to D:/mimic/processed\processed_data.parquet
+2025-04-05 17:05:01,076 - INFO - [Splitting Data] Splitting 920 patients...
+2025-04-05 17:05:01,173 - INFO - [Splitting Data] Split complete: 4068 training, 956 test items
+2025-04-05 17:05:01,175 - INFO - [Splitting Data] Data processing completed successfully
