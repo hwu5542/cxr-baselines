@@ -4,8 +4,8 @@ import pandas as pd
 from tqdm import tqdm
 from save_and_load_parquet import SaveAndLoadParquet
 
-train_path = 'D:/mimic/processed/train.parquet'
-test_path = 'D:/mimic/processed/test.parquet'
+train_path = 'D:/mimic/processed/parsed_train.parquet'
+test_path = 'D:/mimic/processed/parsed_test.parquet'
 output_dir = 'D:/mimic/outputs/random'
 
 def random_retrieve(reports, n_samples=1):
@@ -21,8 +21,8 @@ def main():
     train_df = sl.load_from_parquet(train_path)
     test_df = sl.load_from_parquet(test_path)
 
-    print(train_df.head())
-    print(test_df.head())
+    print(train_df.shape)
+    print(test_df.shape)
     # Get reports
     # Parse reports (if not already parsed during preprocessing)    
     train_reports = train_df['findings'].tolist()
@@ -38,7 +38,7 @@ def main():
         os.makedirs(output_dir)
 
     # Save results
-    pd.DataFrame.from_dict(predictions, orient='index').to_json('outputs/random/predictions.json')
+    pd.DataFrame.from_dict(predictions, orient='index').to_json(os.path.join(output_dir, 'predictions.json'))
 
 if __name__ == "__main__":
     main()

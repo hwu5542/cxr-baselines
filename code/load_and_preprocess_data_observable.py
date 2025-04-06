@@ -161,7 +161,7 @@ if __name__ == "__main__":
     FILE_FOLDER = "D:/mimic/physionet.org/files/mimic-cxr/2.1.0/reports/files"
     FILE_PATH = "D:/mimic/physionet.org/files/mimic-cxr/2.1.0/files"
     OUTPUT_DIR = "D:/mimic/processed"
-    OUTPUT_DIR2 = "D:/mimic/ouptuts"
+    OUTPUT_DIR2 = "D:/mimic/outputs"
     
     try:
         # Step 1: Extract reports
