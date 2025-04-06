@@ -1,5 +1,4 @@
 import os
-import re
 import zipfile
 import pandas as pd
 from pydicom import dcmread
@@ -182,6 +181,7 @@ if __name__ == "__main__":
     FILE_FOLDER = "D:/mimic/physionet.org/files/mimic-cxr/2.1.0/reports/files"
     FILE_PATH = "D:/mimic/physionet.org/files/mimic-cxr/2.1.0/files"
     OUTPUT_DIR = "D:/mimic/processed"
+    OUTPUT_DIR2 = "D:/mimic/ouptuts"
     
     try:
         # Step 1: Extract reports
@@ -197,11 +197,17 @@ if __name__ == "__main__":
         processed_data = processor.load_data(mapping_df)
         
         # Step 4: Split and save
-        processor.save_to_parquet(processed_data, os.path.join(OUTPUT_DIR, "processed_data.parquet"))
+        if not os.path.exists(OUTPUT_DIR):
+            os.makedirs(OUTPUT_DIR)
+
+        if not os.path.exists(OUTPUT_DIR2):
+            os.makedirs(OUTPUT_DIR2)
+
         train_df, test_df = processor.get_train_test_split(processed_data)
         print('train:', len(train_df))
         print('test: ', len( test_df))
-        # processed_data = processor.load_from_parquet(file_path)
+        processor.save_to_parquet(train_df, os.path.join(OUTPUT_DIR, "train.parquet"))
+        processor.save_to_parquet(test_df, os.path.join(OUTPUT_DIR, "test.parquet"))
         
         processor.log_progress("Data processing completed successfully")
     except Exception as e:
