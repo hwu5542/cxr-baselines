@@ -10,6 +10,7 @@ import pydicom
 from tqdm import tqdm
 import logging
 from datetime import datetime
+from report_parser import ReportParser
 
 # Configure logging
 logging.basicConfig(
@@ -209,6 +210,19 @@ if __name__ == "__main__":
         processor.save_to_parquet(train_df, os.path.join(OUTPUT_DIR, "train.parquet"))
         processor.save_to_parquet(test_df, os.path.join(OUTPUT_DIR, "test.parquet"))
         
+        # Step 5:  Parse parquet file
+        parser = ReportParser()
+
+        parser.parse_parquet(
+            input_path=os.path.join(OUTPUT_DIR, "train.parquet"),
+            output_path=os.path.join(OUTPUT_DIR, "parsed_train.parquet")
+        )
+
+        parser.parse_parquet(
+            input_path=os.path.join(OUTPUT_DIR, "test.parquet"),
+            output_path=os.path.join(OUTPUT_DIR, "parsed_test.parquet")
+        )
+
         processor.log_progress("Data processing completed successfully")
     except Exception as e:
         logging.error(f"Processing failed: {str(e)}", exc_info=True)
