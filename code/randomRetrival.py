@@ -1,9 +1,8 @@
 import os
 import random
 import pandas as pd
-from load_and_preprocess_data_observable import ObservableDataProcessor
 from tqdm import tqdm
-from report_parser import parse_report
+from save_and_load_parquet import SaveAndLoadParquet
 
 train_path = 'D:/mimic/processed/train.parquet'
 test_path = 'D:/mimic/processed/test.parquet'
@@ -16,15 +15,16 @@ def random_retrieve(reports, n_samples=1):
 def main():
 
     # Initialize Data processor
-    odp = ObservableDataProcessor()
+    sl = SaveAndLoadParquet()
 
     # Load data
-    train_df = odp.load_from_parquet(train_path)
-    test_df = odp.load_from_parquet(test_path)
+    train_df = sl.load_from_parquet(train_path)
+    test_df = sl.load_from_parquet(test_path)
 
+    print(train_df.head())
+    print(test_df.head())
     # Get reports
-    # Parse reports (if not already parsed during preprocessing)
-    train_df['findings'] = train_df['report'].apply(lambda x: parse_report(x)['findings'])
+    # Parse reports (if not already parsed during preprocessing)    
     train_reports = train_df['findings'].tolist()
     test_ids = test_df['study_id'].tolist()
     

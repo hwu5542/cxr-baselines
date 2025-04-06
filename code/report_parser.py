@@ -88,7 +88,8 @@ class ReportParser:
         """Process parquet file and save parsed reports"""
         df = pd.read_parquet(input_path)
         parsed_df = self.batch_parse(df['report'])
-        parsed_df.to_parquet(output_path)
+        df = df.drop(columns=['report']).join(parsed_df)
+        df.to_parquet(output_path)
 
 # Example usage
 if __name__ == "__main__":
