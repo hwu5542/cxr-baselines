@@ -12,6 +12,7 @@ import logging
 from datetime import datetime
 from report_parser import ReportParser
 from save_and_load_parquet import SaveAndLoadParquet
+from extract_features import DenseNetFeatureExtractor
 
 # Configure logging
 logging.basicConfig(
@@ -24,10 +25,13 @@ logging.basicConfig(
 )
 
 class ObservableDataProcessor:
-    def __init__(self):
+    def __init__(self, extract_features=False, device='cuda:0'):
         self.processed_count = 0
         self.error_count = 0
         self.current_stage = ""
+        self.extract_features = extract_features
+        if extract_features:
+            self.feature_extractor = DenseNetFeatureExtractor(device=device)
 
     def log_progress(self, message):
         logging.info(f"[{self.current_stage}] {message}")
@@ -108,12 +112,21 @@ class ObservableDataProcessor:
                 with open(row["report_path"]) as f:
                     report = self.extract_findings_section(f.read())
                 
-                data.append({
+                record = {
                     "image": img,
                     "report": report,
                     "patient_id": row["patient_id"],
                     "study_id": row["study_id"]
-                })
+                }
+                
+                if self.extract_features:
+                    features = self.feature_extractor.extract_from_array(dicom.pixel_array)
+                    record.update({
+                        "spatial_features": features['spatial'],
+                        "pooled_features": features['pooled']
+                    })
+                
+                data.append(record)
                 self.processed_count += 1
                 
                 if self.processed_count % 2000 == 0:
