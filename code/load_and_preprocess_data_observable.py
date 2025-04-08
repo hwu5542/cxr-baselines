@@ -25,7 +25,7 @@ logging.basicConfig(
 )
 
 class ObservableDataProcessor:
-    def __init__(self, extract_features=False, device='cuda:0'):
+    def __init__(self, extract_features=True, device='cuda:0'):
         self.processed_count = 0
         self.error_count = 0
         self.current_stage = ""

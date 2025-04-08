@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from torchvision.models import densenet121
+from torchvision.models import densenet121, DenseNet121_Weights
 from torchvision.transforms import Compose, Resize, CenterCrop, ToTensor, Normalize
 from PIL import Image
 from tqdm import tqdm
@@ -9,7 +9,7 @@ import numpy as np
 class DenseNetFeatureExtractor:
     def __init__(self, device='cuda:0'):
         # Load pretrained DenseNet121
-        self.model = densenet121(pretrained=True)
+        self.model = densenet121(weights=DenseNet121_Weights.IMAGENET1K_V1)
         
         # Remove classification layers
         self.features = self.model.features
