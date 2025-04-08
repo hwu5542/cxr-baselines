@@ -26,12 +26,13 @@ logging.basicConfig(
 )
 
 class ObservableDataProcessor:
-    def __init__(self, extract_features=True, device='cuda:0', test_mode=False):
+    def __init__(self, extract_features=True, device='cuda:0', test_mode=False, test_size=20):
         self.processed_count = 0
         self.error_count = 0
         self.current_stage = ""
         self.test_mode = test_mode
         self.extract_features = extract_features
+        self.test_size = test_size
         if extract_features:
             self.feature_extractor = DenseNetFeatureExtractor(device=device)
 
@@ -74,8 +75,8 @@ class ObservableDataProcessor:
         patient_dirs = list(Path(base_path).glob("P*/p*"))
 
         if self.test_mode:
-            patient_dirs = patient_dirs[:5]  # Only process first 5 patients in test mode
-            self.log_progress(f"TEST MODE: Processing first 5 patients only")
+            patient_dirs = patient_dirs[:self.test_size/5]  # Only process first self.test_size/5 patients in test mode
+            self.log_progress(f"TEST MODE: Processing first {self.test_size/5} patients only")
         
         self.log_progress(f"Scanning {len(patient_dirs)} patient directories...")
         
@@ -99,8 +100,8 @@ class ObservableDataProcessor:
                         })
 
                         # Early exit if we've reached the test mode limit
-                        if self.test_mode and len(records) >= 20:
-                            self.log_progress(f"TEST MODE: Reached 20 items limit")
+                        if self.test_mode and len(records) >= self.test_size:
+                            self.log_progress(f"TEST MODE: Reached {self.test_size} items limit")
                             return pd.DataFrame(records)
         
         self.log_progress(f"Built mapping for {len(records)} DICOM-report pairs")
@@ -115,8 +116,8 @@ class ObservableDataProcessor:
         
         # Apply test mode limit
         if self.test_mode:
-            df = df.head(20)
-            self.log_progress(f"TEST MODE: Processing first 20 items only")
+            df = df.head(self.test_size)
+            self.log_progress(f"TEST MODE: Processing first {self.test_size} items only")
 
         self.log_progress(f"Processing {len(df)} items...")
         
@@ -184,9 +185,9 @@ class ObservableDataProcessor:
 
 if __name__ == "__main__":
 
-    if len(sys.argv) > 1 and sys.argv[1:][0].lower() == 'test':
+    if len(sys.argv) > 1:
         # Test Mode On
-        processor = ObservableDataProcessor(test_mode=True)
+        processor = ObservableDataProcessor(test_mode=True, test_size= sys.argv[1:][0])
     else:
         # Regular Run
         processor = ObservableDataProcessor()
