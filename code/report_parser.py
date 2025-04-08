@@ -32,9 +32,9 @@ class ReportParser:
 
     def parse_text(self, report_text: str) -> Dict[str, str]:
         """Parse a single report text with all original de-identification rules"""
+        
         if not isinstance(report_text, str):
             return {}
-
         report = report_text.lower()
         # Apply all original de-identification rules
         report = self.mimic_re.sub_id(r'(?:location|address|university|country|state|unit number)', 'LOC', report)
@@ -63,6 +63,7 @@ class ReportParser:
         report = self.mimic_re.rm(r'the study and the report were reviewed by the staff radiologist.', report)
 
         # Parse sections
+        # print(self.section_pattern.finditer(report))
         matches = list(self.section_pattern.finditer(report))
         parsed_report = {}
         for match, next_match in zip(matches, matches[1:] + [None]):
@@ -72,7 +73,7 @@ class ReportParser:
             paragraph = report[start:end]
             paragraph = self.mimic_re.sub(r'\s{2,}', ' ', paragraph).strip()
             parsed_report[title] = paragraph.replace('\n', '\\n')
-
+        # print(parsed_report)
         return parsed_report
 
     def parse_file(self, file_path: str) -> Dict[str, str]:
@@ -87,7 +88,12 @@ class ReportParser:
     def parse_parquet(self, input_path: str, output_path: str):
         """Process parquet file and save parsed reports"""
         df = pd.read_parquet(input_path)
+        # print("check 1")
+        # print(df.columns.to_list())
+        # print(df['report'])
         parsed_df = self.batch_parse(df['report'])
+        # print("check 2")
+        # print(parsed_df)
         df = df.drop(columns=['report']).join(parsed_df)
         df.to_parquet(output_path)
 
@@ -97,7 +103,7 @@ if __name__ == "__main__":
     
     # 1. Parse single report text
     sample_text = "FINDINGS: No pneumothorax. IMPRESSION: Normal study."
-    print(parser.parse_text(sample_text))
+    # print(parser.parse_text(sample_text))
     
     # 2. Process parquet file
     parser.parse_parquet(

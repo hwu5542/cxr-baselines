@@ -46,17 +46,17 @@ class NearestNeighborBaseline:
                       - 'findings' (parsed report texts)
                       - 'study_id' (optional)
         """
-        print(train_df.columns.tolist())
+        print(train_df.columns.to_list())
         logging.info("Extracting features from training data...")
         if self.feature_type == 'pooled':
             self.train_features = np.stack(train_df['pooled_features'].values)
-        elif self.feature_type == 'spatial':
-            # Average pool spatial features to get global representation
-            spatial_features = np.stack(train_df['spatial_features'].values)
-            self.train_features = spatial_features.mean(axis=(2, 3))  # [n, 1024]
+        # elif self.feature_type == 'spatial':
+        #     # Average pool spatial features to get global representation
+        #     spatial_features = np.stack(train_df['spatial_features'].values)
+        #     self.train_features = spatial_features.mean(axis=(2, 3))  # [n, 1024]
         else:
             raise ValueError(f"Unknown feature type: {self.feature_type}")
-            
+        
         self.train_reports = train_df['findings'].values
         self.study_ids = train_df['study_id'].values if 'study_id' in train_df.columns else None
         logging.info(f"Loaded {len(self.train_features)} training samples")
@@ -72,11 +72,11 @@ class NearestNeighborBaseline:
         """
         # Extract features from test data
         logging.info("Extracting features from test data...")
-        if self.feature_type == 'pooled':
-            test_features = np.stack(test_df['pooled_features'].values)
-        else:
-            spatial_features = np.stack(test_df['spatial_features'].values)
-            test_features = spatial_features.mean(axis=(2, 3))
+        # if self.feature_type == 'pooled':
+        test_features = np.stack(test_df['pooled_features'].values)
+        # else:
+        #     spatial_features = np.stack(test_df['spatial_features'].values)
+        #     test_features = spatial_features.mean(axis=(2, 3))
         
         # Compute similarities
         logging.info("Computing similarities...")

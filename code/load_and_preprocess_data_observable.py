@@ -1,4 +1,5 @@
 import os
+import sys
 import zipfile
 import pandas as pd
 from pydicom import dcmread
@@ -50,21 +51,21 @@ class ObservableDataProcessor:
             self.error_count += 1
             raise e
 
-    def extract_findings_section(self, text):
-        """Extract findings section with validation"""
-        try:
-            findings_start = text.upper().find('FINDINGS:')
-            if findings_start == -1:
-                return ""
+    # def extract_findings_section(self, text):
+    #     """Extract findings section with validation"""
+    #     try:
+    #         findings_start = text.upper().find('FINDINGS:')
+    #         if findings_start == -1:
+    #             return ""
             
-            findings_end = text.upper().find('IMPRESSION:')
-            if findings_end == -1:
-                findings_end = len(text)
+    #         findings_end = text.upper().find('IMPRESSION:')
+    #         if findings_end == -1:
+    #             findings_end = len(text)
             
-            return text[findings_start+9:findings_end].strip()
-        except Exception as e:
-            self.error_count += 1
-            raise e
+    #         return text[findings_start+9:findings_end].strip()
+    #     except Exception as e:
+    #         self.error_count += 1
+    #         raise e
 
     def build_mapping(self, base_path, reports_folder):
         """Build DICOM-report mapping with progress tracking"""
@@ -125,7 +126,8 @@ class ObservableDataProcessor:
                 img = self.preprocess_image(dicom.pixel_array, image_size)
                 
                 with open(row["report_path"]) as f:
-                    report = self.extract_findings_section(f.read())
+                    # report = self.extract_findings_section(f.read())
+                    report = f.read()
                 
                 record = {
                     "image": img,
@@ -181,12 +183,14 @@ class ObservableDataProcessor:
         self.log_progress(f"Saved {len(df)} items to {output_path}")
 
 if __name__ == "__main__":
-    # Regular Run
-    # processor = ObservableDataProcessor()
 
-    # Test Mode On
-    processor = ObservableDataProcessor(test_mode=True)
-    
+    if len(sys.argv) > 1 and sys.argv[1:][0].lower() == 'test':
+        # Test Mode On
+        processor = ObservableDataProcessor(test_mode=True)
+    else:
+        # Regular Run
+        processor = ObservableDataProcessor()
+ 
     # Path configuration
     REPORTS_ZIP = "D:/mimic/physionet.org/files/mimic-cxr/2.1.0/mimic-cxr-reports.zip"
     REPORTS_FOLDER = "D:/mimic/physionet.org/files/mimic-cxr/2.1.0/reports"
