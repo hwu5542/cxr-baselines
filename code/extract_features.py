@@ -44,7 +44,7 @@ class DenseNetFeatureExtractor:
             pooled_features = pooled_features.view(-1)  # [1024]
             
         return {
-            'spatial': spatial_features.squeeze().cpu().numpy(),  # [1024,8,8]
+            # 'spatial': spatial_features.squeeze().cpu().numpy(),  # [1024,8,8]
             'pooled': pooled_features.cpu().numpy()  # [1024]
         }
 
@@ -64,9 +64,9 @@ class DenseNetFeatureExtractor:
                 pooled = self.pooling(spatial).squeeze()  # [B,1024]
                 
             features.extend([{
-                'spatial': s.cpu().numpy(),
+                # 'spatial': s.cpu().numpy(),
                 'pooled': p.cpu().numpy()
-            } for s, p in zip(spatial, pooled)])
+            } for p in pooled])
             
         return features
 

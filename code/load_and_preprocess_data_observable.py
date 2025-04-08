@@ -25,10 +25,11 @@ logging.basicConfig(
 )
 
 class ObservableDataProcessor:
-    def __init__(self, extract_features=True, device='cuda:0'):
+    def __init__(self, extract_features=True, device='cuda:0', test_mode=False):
         self.processed_count = 0
         self.error_count = 0
         self.current_stage = ""
+        self.test_mode = test_mode
         self.extract_features = extract_features
         if extract_features:
             self.feature_extractor = DenseNetFeatureExtractor(device=device)
@@ -69,11 +70,15 @@ class ObservableDataProcessor:
         """Build DICOM-report mapping with progress tracking"""
         self.current_stage = "Building Mapping"
         records = []
-        total_patients = len(list(Path(base_path).glob("P*/p*")))
+        patient_dirs = list(Path(base_path).glob("P*/p*"))
+
+        if self.test_mode:
+            patient_dirs = patient_dirs[:5]  # Only process first 5 patients in test mode
+            self.log_progress(f"TEST MODE: Processing first 5 patients only")
         
-        self.log_progress(f"Scanning {total_patients} patient directories...")
+        self.log_progress(f"Scanning {len(patient_dirs)} patient directories...")
         
-        for patient_dir in tqdm(Path(base_path).glob("P*/p*"), desc="Patients"):
+        for patient_dir in tqdm(patient_dirs, desc="Patients"):
             patient_id = patient_dir.name[1:]
             
             for study_dir in patient_dir.glob("s[!.]*"):
@@ -91,6 +96,11 @@ class ObservableDataProcessor:
                             "dicom_path": str(dicom_path),
                             "report_path": str(report_path)
                         })
+
+                        # Early exit if we've reached the test mode limit
+                        if self.test_mode and len(records) >= 20:
+                            self.log_progress(f"TEST MODE: Reached 20 items limit")
+                            return pd.DataFrame(records)
         
         self.log_progress(f"Built mapping for {len(records)} DICOM-report pairs")
         return pd.DataFrame(records)
@@ -102,6 +112,11 @@ class ObservableDataProcessor:
         self.processed_count = 0
         self.error_count = 0
         
+        # Apply test mode limit
+        if self.test_mode:
+            df = df.head(20)
+            self.log_progress(f"TEST MODE: Processing first 20 items only")
+
         self.log_progress(f"Processing {len(df)} items...")
         
         for _, row in tqdm(df.iterrows(), total=len(df), desc="Processing"):
@@ -122,7 +137,7 @@ class ObservableDataProcessor:
                 if self.extract_features:
                     features = self.feature_extractor.extract_from_array(dicom.pixel_array)
                     record.update({
-                        "spatial_features": features['spatial'],
+                        # "spatial_features": features['spatial'],
                         "pooled_features": features['pooled']
                     })
                 
@@ -166,7 +181,11 @@ class ObservableDataProcessor:
         self.log_progress(f"Saved {len(df)} items to {output_path}")
 
 if __name__ == "__main__":
-    processor = ObservableDataProcessor()
+    # Regular Run
+    # processor = ObservableDataProcessor()
+
+    # Test Mode On
+    processor = ObservableDataProcessor(test_mode=True)
     
     # Path configuration
     REPORTS_ZIP = "D:/mimic/physionet.org/files/mimic-cxr/2.1.0/mimic-cxr-reports.zip"

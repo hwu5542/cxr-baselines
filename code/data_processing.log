@@ -63,3 +63,124 @@
 2025-04-07 21:41:41,862 - INFO - [Building Mapping] Scanning 65371 patient directories...
 2025-04-07 21:43:41,628 - INFO - [Building Mapping] Built mapping for 10353 DICOM-report pairs
 2025-04-07 21:43:41,629 - INFO - [Loading Data] Processing 10353 items...
+2025-04-07 21:44:40,829 - INFO - [Building Mapping] Scanning 65371 patient directories...
+2025-04-07 21:46:26,558 - INFO - [Building Mapping] Built mapping for 10357 DICOM-report pairs
+2025-04-07 21:46:26,558 - INFO - [Loading Data] Processing 10357 items...
+2025-04-07 21:51:03,947 - INFO - [Loading Data] Processed 2000 items
+2025-04-07 21:55:41,191 - INFO - [Loading Data] Processed 4000 items
+2025-04-07 22:00:23,248 - INFO - [Loading Data] Processed 6000 items
+2025-04-07 22:04:57,862 - INFO - [Loading Data] Processed 8000 items
+2025-04-07 22:09:36,484 - INFO - [Loading Data] Processed 10000 items
+2025-04-07 22:10:25,435 - INFO - [Loading Data] Completed: 10357 successes, 0 errors
+2025-04-07 22:10:25,482 - INFO - [Splitting Data] Splitting 1806 patients...
+2025-04-07 22:10:25,662 - INFO - [Splitting Data] Split complete: 8430 training, 1927 test items
+2025-04-07 22:10:25,665 - INFO - [Saving Data] Saving to D:/mimic/processed\train.parquet...
+2025-04-07 22:10:30,247 - ERROR - Processing failed: ('Can only convert 1-dimensional array values', 'Conversion failed for column spatial_features with type object')
+Traceback (most recent call last):
+  File "C:\Work\Bash\sp25_cs598DLH\cxr-baselines\code\load_and_preprocess_data_observable.py", line 202, in <module>
+    processor.save_to_parquet(train_df, os.path.join(OUTPUT_DIR, "train.parquet"))
+  File "C:\Work\Bash\sp25_cs598DLH\cxr-baselines\code\load_and_preprocess_data_observable.py", line 165, in save_to_parquet
+    sl.save_to_parquet(df, output_path)
+  File "C:\Work\Bash\sp25_cs598DLH\cxr-baselines\code\save_and_load_parquet.py", line 16, in save_to_parquet
+    df.to_parquet(output_path)
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\site-packages\pandas\util\_decorators.py", line 333, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\site-packages\pandas\core\frame.py", line 3113, in to_parquet
+    return to_parquet(
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\site-packages\pandas\io\parquet.py", line 480, in to_parquet
+    impl.write(
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\site-packages\pandas\io\parquet.py", line 190, in write
+    table = self.api.Table.from_pandas(df, **from_pandas_kwargs)
+  File "pyarrow\\table.pxi", line 4751, in pyarrow.lib.Table.from_pandas
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\site-packages\pyarrow\pandas_compat.py", line 652, in dataframe_to_arrays
+    arrays[i] = maybe_fut.result()
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\concurrent\futures\_base.py", line 439, in result
+    return self.__get_result()
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\concurrent\futures\_base.py", line 391, in __get_result
+    raise self._exception
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\site-packages\pyarrow\pandas_compat.py", line 626, in convert_column
+    raise e
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\site-packages\pyarrow\pandas_compat.py", line 620, in convert_column
+    result = pa.array(col, type=type_, from_pandas=True, safe=safe)
+  File "pyarrow\\array.pxi", line 362, in pyarrow.lib.array
+  File "pyarrow\\array.pxi", line 87, in pyarrow.lib._ndarray_to_array
+  File "pyarrow\\error.pxi", line 92, in pyarrow.lib.check_status
+pyarrow.lib.ArrowInvalid: ('Can only convert 1-dimensional array values', 'Conversion failed for column spatial_features with type object')
+2025-04-07 22:15:57,711 - INFO - [Building Mapping] Scanning 65371 patient directories...
+2025-04-07 22:17:47,762 - INFO - [Building Mapping] Built mapping for 10408 DICOM-report pairs
+2025-04-07 22:17:47,762 - INFO - [Loading Data] Processing 10408 items...
+2025-04-07 22:22:25,914 - INFO - [Loading Data] Processed 2000 items
+2025-04-07 22:27:02,748 - INFO - [Loading Data] Processed 4000 items
+2025-04-07 22:31:34,732 - INFO - [Loading Data] Processed 6000 items
+2025-04-07 22:35:32,574 - INFO - [Loading Data] Processed 8000 items
+2025-04-07 22:39:28,836 - INFO - [Loading Data] Processed 10000 items
+2025-04-07 22:40:17,734 - INFO - [Loading Data] Completed: 10408 successes, 0 errors
+2025-04-07 22:40:17,777 - INFO - [Splitting Data] Splitting 1814 patients...
+2025-04-07 22:40:17,953 - INFO - [Splitting Data] Split complete: 8488 training, 1920 test items
+2025-04-07 22:40:17,954 - INFO - [Saving Data] Saving to D:/mimic/processed\train.parquet...
+2025-04-07 22:40:27,303 - ERROR - Processing failed: ('cannot mix list and non-list, non-null values', 'Conversion failed for column spatial_features with type object')
+Traceback (most recent call last):
+  File "C:\Work\Bash\sp25_cs598DLH\cxr-baselines\code\load_and_preprocess_data_observable.py", line 202, in <module>
+    processor.save_to_parquet(train_df, os.path.join(OUTPUT_DIR, "train.parquet"))
+  File "C:\Work\Bash\sp25_cs598DLH\cxr-baselines\code\load_and_preprocess_data_observable.py", line 165, in save_to_parquet
+    sl.save_to_parquet(df, output_path)
+  File "C:\Work\Bash\sp25_cs598DLH\cxr-baselines\code\save_and_load_parquet.py", line 28, in save_to_parquet
+    df.to_parquet(output_path)
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\site-packages\pandas\util\_decorators.py", line 333, in wrapper
+    return func(*args, **kwargs)
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\site-packages\pandas\core\frame.py", line 3113, in to_parquet
+    return to_parquet(
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\site-packages\pandas\io\parquet.py", line 480, in to_parquet
+    impl.write(
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\site-packages\pandas\io\parquet.py", line 190, in write
+    table = self.api.Table.from_pandas(df, **from_pandas_kwargs)
+  File "pyarrow\\table.pxi", line 4751, in pyarrow.lib.Table.from_pandas
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\site-packages\pyarrow\pandas_compat.py", line 652, in dataframe_to_arrays
+    arrays[i] = maybe_fut.result()
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\concurrent\futures\_base.py", line 439, in result
+    return self.__get_result()
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\concurrent\futures\_base.py", line 391, in __get_result
+    raise self._exception
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\site-packages\pyarrow\pandas_compat.py", line 626, in convert_column
+    raise e
+  File "C:\Users\Hwu55\scoop\apps\anaconda3\current\lib\site-packages\pyarrow\pandas_compat.py", line 620, in convert_column
+    result = pa.array(col, type=type_, from_pandas=True, safe=safe)
+  File "pyarrow\\array.pxi", line 362, in pyarrow.lib.array
+  File "pyarrow\\array.pxi", line 87, in pyarrow.lib._ndarray_to_array
+  File "pyarrow\\error.pxi", line 92, in pyarrow.lib.check_status
+pyarrow.lib.ArrowInvalid: ('cannot mix list and non-list, non-null values', 'Conversion failed for column spatial_features with type object')
+2025-04-07 23:27:42,032 - INFO - [Building Mapping] TEST MODE: Processing first 5 patients only
+2025-04-07 23:27:42,032 - INFO - [Building Mapping] Scanning 5 patient directories...
+2025-04-07 23:27:42,050 - INFO - [Building Mapping] TEST MODE: Reached 20 items limit
+2025-04-07 23:27:42,052 - INFO - [Loading Data] TEST MODE: Processing first 20 items only
+2025-04-07 23:27:42,052 - INFO - [Loading Data] Processing 20 items...
+2025-04-07 23:27:44,765 - INFO - [Loading Data] Completed: 20 successes, 0 errors
+2025-04-07 23:27:44,783 - INFO - [Splitting Data] Splitting 4 patients...
+2025-04-07 23:27:44,787 - INFO - [Splitting Data] Split complete: 17 training, 3 test items
+2025-04-07 23:27:44,788 - INFO - [Saving Data] Saving to D:/mimic/processed\train.parquet...
+2025-04-07 23:27:45,099 - ERROR - Processing failed: 'SaveAndLoadParquet' object has no attribute '_create_schema'
+Traceback (most recent call last):
+  File "C:\Work\Bash\sp25_cs598DLH\cxr-baselines\code\load_and_preprocess_data_observable.py", line 221, in <module>
+    processor.save_to_parquet(train_df, os.path.join(OUTPUT_DIR, "train.parquet"))
+  File "C:\Work\Bash\sp25_cs598DLH\cxr-baselines\code\load_and_preprocess_data_observable.py", line 180, in save_to_parquet
+    sl.save_to_parquet(df, output_path)
+  File "C:\Work\Bash\sp25_cs598DLH\cxr-baselines\code\save_and_load_parquet.py", line 32, in save_to_parquet
+    schema = self._create_schema(df)
+AttributeError: 'SaveAndLoadParquet' object has no attribute '_create_schema'
+2025-04-08 00:03:37,452 - INFO - [Building Mapping] TEST MODE: Processing first 5 patients only
+2025-04-08 00:03:37,452 - INFO - [Building Mapping] Scanning 5 patient directories...
+2025-04-08 00:03:37,465 - INFO - [Building Mapping] TEST MODE: Reached 20 items limit
+2025-04-08 00:03:37,465 - INFO - [Loading Data] TEST MODE: Processing first 20 items only
+2025-04-08 00:03:37,465 - INFO - [Loading Data] Processing 20 items...
+2025-04-08 00:03:39,400 - INFO - [Loading Data] Completed: 20 successes, 0 errors
+2025-04-08 00:03:39,402 - INFO - [Splitting Data] Splitting 4 patients...
+2025-04-08 00:03:39,405 - INFO - [Splitting Data] Split complete: 17 training, 3 test items
+2025-04-08 00:03:39,405 - INFO - [Saving Data] Saving to D:/mimic/processed\train.parquet...
+2025-04-08 00:03:39,449 - INFO - [Saving Data] Saved 17 items to D:/mimic/processed\train.parquet
+2025-04-08 00:03:39,449 - INFO - [Saving Data] Saving to D:/mimic/processed\test.parquet...
+2025-04-08 00:03:39,457 - INFO - [Saving Data] Saved 3 items to D:/mimic/processed\test.parquet
+2025-04-08 00:03:39,903 - INFO - [Saving Data] Data processing completed successfully
