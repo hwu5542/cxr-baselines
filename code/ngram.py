@@ -6,6 +6,7 @@ import pickle
 from tqdm import tqdm
 from collections import Counter, defaultdict
 from sklearn.metrics.pairwise import cosine_similarity
+from save_and_load_parquet import SaveAndLoadParquet
 import logging
 
 # Configure logging
@@ -77,18 +78,20 @@ class ConditionalNGramModel:
         # Remove start tokens from result
         return ' '.join(result[self.n-1:])
 
-def get_nearest_neighbors(query_feature, train_features, train_study_ids, k=100):
-    """Find k nearest neighbors based on cosine similarity"""
-    similarities = cosine_similarity([query_feature], train_features)[0]
-    top_indices = np.argsort(similarities)[-k:]
-    return train_study_ids[top_indices]
+# def get_nearest_neighbors(query_feature, train_features, train_study_ids, k=100):
+#     """Find k nearest neighbors based on cosine similarity"""
+#     # print(query)
+#     similarities = cosine_similarity([query_feature], train_features)[0]
+#     top_indices = np.argsort(similarities)[-k:]
+#     return train_study_ids[top_indices]
 
 def run_ngram_model():
     try:
         logging.info("Loading data...")
         # Load the parsed data with features
-        train_df = pd.read_parquet(os.path.join(DATA_DIR, "parsed_train.parquet"))
-        test_df = pd.read_parquet(os.path.join(DATA_DIR, "parsed_test.parquet"))
+        sl = SaveAndLoadParquet()
+        train_df = sl.load_from_parquet(os.path.join(DATA_DIR, "parsed_train.parquet"))
+        test_df = sl.load_from_parquet(os.path.join(DATA_DIR, "parsed_test.parquet"))
         
         logging.info(f"Train samples: {len(train_df)}")
         logging.info(f"Test samples: {len(test_df)}")
@@ -98,21 +101,42 @@ def run_ngram_model():
         train_reports = train_df['findings'].values
         test_features = np.stack(test_df['pooled_features'].values)
         
-        # Build study_id to report lookup
-        report_lookup = dict(zip(train_df['study_id'], train_df['findings']))
+        # # Build study_id to report lookup
+        # report_lookup = dict(zip(train_df['study_id'], train_df['findings']))
         
         # Prepare test set generation
         test_study_ids = test_df['study_id'].values
         train_study_ids = train_df['study_id'].values
-        
+
+        # Compute similarities once for all test samples
+        logging.info("Computing similarities...")
+        sim_matrix = cosine_similarity(test_features, train_features)
+        neighbor_indices = np.argpartition(sim_matrix, -N_NEIGHBORS, axis=1)[:, -N_NEIGHBORS:]
+
         # Generate reports for test set using conditional n-gram
-        generated_reports = []
-        for test_feature, test_study_id in tqdm(zip(test_features, test_study_ids), 
-                                              total=len(test_features), 
-                                              desc="Generating reports"):
-            # Find nearest neighbors
-            neighbor_study_ids = get_nearest_neighbors(test_feature, train_features, train_study_ids, N_NEIGHBORS)
-            neighbor_reports = [report_lookup[sid] for sid in neighbor_study_ids if sid in report_lookup]
+        # generated_reports = []
+        # for test_feature, test_study_id in tqdm(zip(test_features, test_study_ids), 
+        #                                       total=len(test_features), 
+        #                                       desc="Generating reports"):
+        #     # Find nearest neighbors
+        #     neighbor_study_ids = get_nearest_neighbors(test_feature, train_features, train_study_ids, N_NEIGHBORS)
+        #     neighbor_reports = [report_lookup[sid] for sid in neighbor_study_ids if sid in report_lookup]
+            
+        #     # Train n-gram model on neighbors' reports
+        #     ngram_model = ConditionalNGramModel(n=N_GRAM)
+        #     ngram_model.train(neighbor_reports)
+            
+        #     # Generate report
+        #     generated_report = ngram_model.generate(max_length=100)
+        #     generated_reports.append({
+        #         'study_id': test_study_id,
+        #         'generated_report': generated_report
+        #     })
+        predictions = []
+        for i in tqdm(range(len(test_features)), desc="Generating reports"):
+            # Get neighbor indices and reports
+            neighbors = neighbor_indices[i]
+            neighbor_reports = [train_reports[idx] for idx in neighbors]
             
             # Train n-gram model on neighbors' reports
             ngram_model = ConditionalNGramModel(n=N_GRAM)
@@ -120,20 +144,34 @@ def run_ngram_model():
             
             # Generate report
             generated_report = ngram_model.generate(max_length=100)
-            generated_reports.append({
-                'study_id': test_study_id,
-                'generated_report': generated_report
-            })
             
-        # Convert to DataFrame and save
-        results_df = pd.DataFrame(generated_reports)
+            predictions.append({
+                'study_id': test_study_ids[i],
+                'true_report': test_df['findings'].iloc[i],
+                'pred_report': generated_report,
+                'neighbor_indices': neighbors,
+                'similarity_score': sim_matrix[i, neighbors[0]]  # Score with top neighbor
+            })
+
+        # # Convert to DataFrame and save
+        # results_df = pd.DataFrame(generated_reports)
+
+        # Convert to DataFrame
+        results_df = pd.DataFrame(predictions)
         
-        # Save results
+        # Save results in same format as nearest_neighbor.py
         Path(OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
-        output_path = os.path.join(OUTPUT_DIR, f"{N_GRAM}-gram.tsv")
-        results_df.to_csv(output_path, sep='\t', index=False)
         
-        logging.info(f"Saved generated reports to {output_path}")
+        # 1. Parquet (main format)
+        results_df.to_parquet(f"{OUTPUT_DIR}/predictions.parquet")
+
+        # # Save results
+        # Path(OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
+        # output_path = os.path.join(OUTPUT_DIR, f"{N_GRAM}-gram.tsv")
+        # results_df.to_csv(output_path, sep='\t', index=False)
+        
+        logging.info(f"Saved predictions to {OUTPUT_DIR}/predictions.parquet")
+        # logging.info(f"Saved generated reports to {output_path}")
         logging.info("N-gram model completed successfully")
         
     except Exception as e:
