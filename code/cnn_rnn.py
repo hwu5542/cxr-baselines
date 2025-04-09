@@ -1,212 +1,183 @@
-import numpy as np
-import pandas as pd
-import os
-from pathlib import Path
-import pickle
-from tqdm import tqdm
 import tensorflow as tf
-from tensorflow.keras.layers import Input, Conv2D, LSTM, Dense, Embedding, Attention, LayerNormalization
+from tensorflow.keras.applications import DenseNet121
+from tensorflow.keras.layers import Input, Dense, LSTM, Embedding
 from tensorflow.keras.models import Model
 from tensorflow.keras.optimizers import Adam
-from transformers import TFBertModel, BertTokenizer
-from save_and_load_parquet import SaveAndLoadParquet
-import logging
 
-# Configure logging (matches ngram.py exactly)
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('cnn_rnn_bert.log'),
-        logging.StreamHandler()
-    ]
-)
-
-# Configuration (matches ngram.py structure)
-DATA_DIR = "D:/mimic/processed"
-OUTPUT_DIR = "D:/mimic/outputs/cnn_rnn_bert"
-MAX_SEQ_LENGTH = 100
-BATCH_SIZE = 32
-EPOCHS = 64
-INIT_LR = 0.001
-BEAM_WIDTH = 4
-
-# Load data (same as ngram.py)
-logging.info("Loading data...")
-sl = SaveAndLoadParquet()
-train_df = sl.load_from_parquet(os.path.join(DATA_DIR, "parsed_train.parquet"))
-test_df = sl.load_from_parquet(os.path.join(DATA_DIR, "parsed_test.parquet"))
-logging.info(f"Train samples: {len(train_df)}")
-logging.info(f"Test samples: {len(test_df)}")
-
-# Initialize tokenizer (for text generation)
-tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-VOCAB_SIZE = tokenizer.vocab_size
-
-class ImageEncoder(tf.keras.layers.Layer):
-    def __init__(self):
-        super(ImageEncoder, self).__init__()
-        self.cnn = tf.keras.Sequential([
-            Conv2D(64, 3, activation='relu', padding='same'),
-            Conv2D(64, 3, activation='relu', padding='same'),
-            tf.keras.layers.MaxPooling2D(2, 2),
-            Conv2D(128, 3, activation='relu', padding='same'),
-            Conv2D(128, 3, activation='relu', padding='same'),
-            tf.keras.layers.MaxPooling2D(2, 2),
-            tf.keras.layers.Flatten(),
-            Dense(256, activation='relu')
-        ])
+class CNNRNNModel:
+    def __init__(self, vocab_size, max_seq_length, embedding_dim=256, lstm_units=256):
+        """
+        Initialize the CNN-RNN model for radiology report generation
         
-    def call(self, images):
-        return self.cnn(images)
-
-class ReportDecoder(tf.keras.layers.Layer):
-    def __init__(self):
-        super(ReportDecoder, self).__init__()
-        self.embedding = Embedding(VOCAB_SIZE, 256)
-        self.lstm = LSTM(512, return_sequences=True, return_state=True)
-        self.attention = Attention()
-        self.dense = Dense(VOCAB_SIZE, activation='softmax')
+        Args:
+            vocab_size (int): Size of the vocabulary
+            max_seq_length (int): Maximum length of the report sequences
+            embedding_dim (int): Dimension of the word embeddings
+            lstm_units (int): Number of units in the LSTM layer
+        """
+        self.vocab_size = vocab_size
+        self.max_seq_length = max_seq_length
+        self.embedding_dim = embedding_dim
+        self.lstm_units = lstm_units
         
-    def call(self, inputs, initial_state=None):
-        x, encoder_output = inputs
-        x = self.embedding(x)
-        lstm_output, state_h, state_c = self.lstm(x, initial_state=initial_state)
-        context_vector = self.attention([lstm_output, encoder_output])
-        combined_output = tf.concat([lstm_output, context_vector], axis=-1)
-        return self.dense(combined_output), [state_h, state_c]
-
-class CNN_RNN_BERT_Model(tf.keras.Model):
-    def __init__(self):
-        super(CNN_RNN_BERT_Model, self).__init__()
-        self.image_encoder = ImageEncoder()
-        self.decoder = ReportDecoder()
+        # Build the model
+        self._build_model()
         
-    def call(self, inputs):
-        images, decoder_input = inputs
-        image_features = self.image_encoder(images)
-        image_features = tf.expand_dims(image_features, 1)
-        decoder_output, _ = self.decoder((decoder_input, image_features))
-        return decoder_output
-
-def learning_rate_schedule(epoch, lr):
-    if (epoch + 1) % 16 == 0:
-        return lr * 0.5
-    return lr
-
-def teacher_forcing_schedule(epoch):
-    return min(0.05 * (epoch // 16), 0.8)
-
-def beam_search_decode(model, image_input, beam_width=4, max_length=MAX_SEQ_LENGTH):
-    # Encode image
-    image_features = model.image_encoder(image_input)
-    image_features = tf.expand_dims(image_features, 1)
-    
-    # Beam search initialization
-    start_token = tokenizer.cls_token_id
-    end_token = tokenizer.sep_token_id
-    
-    beams = [([start_token], 0.0, None)]  # (sequence, score, state)
-    
-    for _ in range(max_length):
-        new_beams = []
-        for seq, score, state in beams:
-            if seq[-1] == end_token:
-                new_beams.append((seq, score, state))
-                continue
-                
-            decoder_input = tf.expand_dims([seq[-1]], 0)
-            predictions, new_state = model.decoder((decoder_input, image_features), initial_state=state)
-            predictions = tf.squeeze(predictions, 0)
+    def _build_model(self):
+        """Build the CNN-RNN model architecture"""
+        
+        # Image encoder (DenseNet121)
+        image_input = Input(shape=(None, None, 3), name='image_input')
+        base_model = DenseNet121(
+            include_top=False,
+            weights='imagenet',
+            input_tensor=image_input,
+            pooling='avg'
+        )
+        
+        # Freeze the CNN layers (optional - could fine-tune later)
+        for layer in base_model.layers:
+            layer.trainable = False
             
-            top_k = tf.math.top_k(predictions[-1], k=beam_width)
-            for i in range(beam_width):
-                token = top_k.indices[i].numpy()
-                token_prob = top_k.values[i].numpy()
-                new_seq = seq + [token]
-                new_score = score - np.log(token_prob + 1e-8)
-                new_beams.append((new_seq, new_score, new_state))
+        # Project CNN features to lower dimension (1024 -> 256)
+        cnn_features = base_model.output
+        projected_features = Dense(self.embedding_dim, activation='relu', name='feature_projection')(cnn_features)
         
-        beams = sorted(new_beams, key=lambda x: x[1])[:beam_width]
-        if all(beam[0][-1] == end_token for beam in beams):
-            break
+        # Sequence decoder
+        caption_input = Input(shape=(self.max_seq_length,), name='caption_input')
+        
+        # Word embedding layer
+        embedding_layer = Embedding(
+            input_dim=self.vocab_size,
+            output_dim=self.embedding_dim,
+            mask_zero=True,
+            name='word_embedding'
+        )(caption_input)
+        
+        # LSTM decoder
+        lstm_layer = LSTM(
+            self.lstm_units,
+            return_sequences=True,
+            return_state=True,
+            name='lstm_decoder'
+        )
+        
+        # Initial state comes from CNN features
+        initial_state = [projected_features, projected_features]  # h and c states
+        
+        # Pass embeddings through LSTM
+        lstm_output, _, _ = lstm_layer(embedding_layer, initial_state=initial_state)
+        
+        # Output layer
+        output = Dense(self.vocab_size, activation='softmax', name='output')(lstm_output)
+        
+        # Define the training model
+        self.model = Model(
+            inputs=[image_input, caption_input],
+            outputs=output,
+            name='cnn_rnn_model'
+        )
+        
+        # Compile the model
+        self.model.compile(
+            optimizer=Adam(learning_rate=1e-3),
+            loss='sparse_categorical_crossentropy',
+            metrics=['accuracy']
+        )
+        
+    def train(self, train_data, val_data, epochs=64, batch_size=32):
+        """
+        Train the model with teacher forcing
+        
+        Args:
+            train_data: Training data generator yielding (images, captions, targets)
+            val_data: Validation data generator
+            epochs: Number of training epochs
+            batch_size: Batch size
+        """
+        # Learning rate schedule (decay by 0.5 every 16 epochs)
+        def lr_scheduler(epoch, lr):
+            if epoch > 0 and epoch % 16 == 0:
+                return lr * 0.5
+            return lr
+        
+        callbacks = [
+            tf.keras.callbacks.LearningRateScheduler(lr_scheduler),
+            tf.keras.callbacks.ModelCheckpoint(
+                'best_model.h5',
+                save_best_only=True,
+                monitor='val_loss'
+            )
+        ]
+        
+        history = self.model.fit(
+            train_data,
+            validation_data=val_data,
+            epochs=epochs,
+            batch_size=batch_size,
+            callbacks=callbacks
+        )
+        
+        return history
     
-    # Length normalization
-    scored_beams = [(seq, score / (len(seq)**0.7)) for seq, score, _ in beams]
-    best_beam = min(scored_beams, key=lambda x: x[1])
-    return tokenizer.decode(best_beam[0], skip_special_tokens=True)
-
-def prepare_dataset(df):
-    """Prepare dataset in same format as ngram.py"""
-    images = np.stack(df['pooled_features'].values)  # Using pooled_features as image representation
-    study_ids = df['study_id'].values
-    reports = df['findings'].values
-    return images, study_ids, reports
-
-def train_and_predict():
-    try:
-        # Prepare datasets (same as ngram.py)
-        logging.info("Preparing datasets...")
-        train_images, train_study_ids, train_reports = prepare_dataset(train_df)
-        test_images, test_study_ids, test_reports = prepare_dataset(test_df)
+    def predict_beam_search(self, image, tokenizer, beam_width=4, max_length=100):
+        """
+        Generate report using beam search
         
-        # Initialize model
-        model = CNN_RNN_BERT_Model()
-        optimizer = Adam(INIT_LR)
-        
-        # Training loop
-        logging.info("Starting training...")
-        for epoch in range(EPOCHS):
-            current_lr = learning_rate_schedule(epoch, INIT_LR)
-            tf.keras.backend.set_value(optimizer.lr, current_lr)
-            teacher_forcing_prob = 1.0 - teacher_forcing_schedule(epoch)
+        Args:
+            image: Preprocessed input image
+            tokenizer: Tokenizer for converting words to indices and back
+            beam_width: Number of beams to keep
+            max_length: Maximum length of generated report
             
-            # Training step would go here (omitted for brevity)
-            # In practice you would need to tokenize reports and create proper batches
-            
-            logging.info(f"Epoch {epoch+1}/{EPOCHS} - LR: {current_lr:.5f} - TF Prob: {teacher_forcing_prob:.2f}")
-            
-            # Generate predictions every 8 epochs to monitor progress
-            if (epoch + 1) % 8 == 0 or epoch == EPOCHS - 1:
-                predictions = []
-                for i in tqdm(range(len(test_images)), desc="Generating predictions"):
-                    # Get test image and generate report
-                    test_image = tf.expand_dims(test_images[i], 0)
-                    generated_report = beam_search_decode(model, test_image, beam_width=BEAM_WIDTH)
-                    
-                    predictions.append({
-                        'study_id': test_study_ids[i],
-                        'true_report': test_reports[i],
-                        'pred_report': generated_report,
-                        'epoch': epoch + 1
-                    })
-                    
-                    # Log first 3 samples
-                    if i < 3:
-                        logging.info(f"\nSample {i+1}:")
-                        logging.info(f"True report: {test_reports[i]}")
-                        logging.info(f"Generated report: {generated_report}")
-                
-                # Save predictions (same format as ngram.py)
-                results_df = pd.DataFrame(predictions)
-                Path(OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
-                
-                # Save in same formats as ngram.py
-                output_path = f"{OUTPUT_DIR}/predictions_epoch{epoch+1}.parquet"
-                results_df.to_parquet(output_path)
-                logging.info(f"Saved predictions to {output_path}")
-                
-                # Also save CSV version
-                results_df[['study_id', 'true_report', 'pred_report']].to_csv(
-                    f"{OUTPUT_DIR}/predictions_epoch{epoch+1}.csv", index=False
-                )
+        Returns:
+            Generated report string
+        """
+        # Get CNN features
+        cnn_features = self.model.get_layer('feature_projection').predict(image[np.newaxis, ...])
         
-        logging.info("Training completed successfully")
-        return results_df
+        # Initialize beam search
+        start_token = tokenizer.word_index['<start>']
+        end_token = tokenizer.word_index['<end>']
         
-    except Exception as e:
-        logging.error(f"Error in CNN-RNN-BERT model: {str(e)}", exc_info=True)
-        raise
-
-if __name__ == "__main__":
-    train_and_predict()
+        # Initialize beams: (sequence, probability)
+        beams = [([start_token], 1.0)]
+        
+        for _ in range(max_length):
+            new_beams = []
+            
+            for seq, prob in beams:
+                if seq[-1] == end_token:
+                    new_beams.append((seq, prob))
+                    continue
+                
+                # Predict next word probabilities
+                input_seq = np.array([seq])
+                lstm_output = self.model.get_layer('lstm_decoder')(
+                    input_seq,
+                    initial_state=[cnn_features, cnn_features]
+                )[0]
+                word_probs = self.model.get_layer('output')(lstm_output)[0, -1, :]
+                
+                # Get top k words
+                top_k = np.argsort(word_probs)[-beam_width:]
+                
+                for word_idx in top_k:
+                    new_seq = seq + [word_idx]
+                    new_prob = prob * word_probs[word_idx]
+                    new_beams.append((new_seq, new_prob))
+            
+            # Select top beam_width beams
+            beams = sorted(new_beams, key=lambda x: x[1], reverse=True)[:beam_width]
+            
+            # Check if all beams have ended
+            if all(seq[-1] == end_token for seq, _ in beams):
+                break
+        
+        # Select best beam
+        best_seq = beams[0][0]
+        
+        # Convert indices to words
+        report = ' '.join(tokenizer.index_word[idx] for idx in best_seq if idx not in [start_token, end_token])
+        
+        return report
