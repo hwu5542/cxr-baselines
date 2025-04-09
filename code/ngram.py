@@ -26,11 +26,13 @@ N_NEIGHBORS = 100  # Number of neighbors to consider for conditional n-gram
 N_GRAM = 3  # n-gram order
 START_TOKEN = '<START>'
 END_TOKEN = '<END>'
+UNK_TOKEN = '<UNK>'  # For unknown words
 OUTPUT_DIR = "D:/mimic/outputs/ngram"
 
 class ConditionalNGramModel:
     def __init__(self, n=3):
         self.n = n
+        self.vocab = set()
         self.lm = defaultdict(Counter)
         
     def train(self, reports):
@@ -43,30 +45,50 @@ class ConditionalNGramModel:
             tokens = report.lower().split()
             padded_tokens = [START_TOKEN] * (self.n-1) + tokens + [END_TOKEN]
             
+            # Update vocabulary
+            self.vocab.update(tokens)
+
             # Count n-gram occurrences
             for i in range(len(padded_tokens) - self.n + 1):
-                context = tuple(padded_tokens[i:i+self.n-1])
+                context = tuple(padded_tokens[i:i+self.n-1]) if self.n > 1 else ()
                 target = padded_tokens[i+self.n-1]
                 self.lm[context][target] += 1
                 
-    def generate(self, seed=None, max_length=100):
-        """Generate text from the language model"""
-        if seed is None:
-            seed = [START_TOKEN] * (self.n-1)
-        elif len(seed) < self.n-1:
-            seed = [START_TOKEN] * (self.n-1 - len(seed)) + seed
+    def generate(self, seed=None, max_length=100, temperature=1.0):
+        """Generate text from the language model
+        
+        Args:
+            seed: Optional seed text to start generation
+            max_length: Maximum length of generated text
+            temperature: Controls randomness (1.0=normal, <1.0=more conservative)
             
-        current = list(seed)
+        Returns:
+            Generated text string
+        """
+        if seed is None:
+            current = [START_TOKEN] * (self.n-1)
+        else:
+            seed_tokens = seed.lower().split()
+            current = ([START_TOKEN] * (self.n-1 - len(seed_tokens))) + seed_tokens
+            current = current[-(self.n-1):]  # Truncate to context size
+            
+        # current = list(seed)
         result = current.copy()
         
-        while len(result) < max_length:
-            context = tuple(current[-(self.n-1):])
+        while len(result) < max_length + (self.n-1):
+            context = tuple(current[-(self.n-1):]) if self.n > 1 else ()
+            
             if context not in self.lm:
                 break
-                
-            # Sample next word based on counts
+
+            # Get possible next words and their counts
             words, counts = zip(*self.lm[context].items())
-            probs = np.array(counts) / sum(counts)
+            
+            # Apply temperature
+            counts = np.array(counts) ** (1/temperature)
+            probs = counts / sum(counts)
+            
+            # Sample next word
             next_word = np.random.choice(words, p=probs)
             
             if next_word == END_TOKEN:
@@ -85,8 +107,15 @@ class ConditionalNGramModel:
 #     top_indices = np.argsort(similarities)[-k:]
 #     return train_study_ids[top_indices]
 
-def run_ngram_model():
+def run_ngram_model(n_gram=3):
+    """Run conditional n-gram model with specified n-gram order
+    
+    Args:
+        n_gram: Order of n-gram model (1, 2, or 3)
+    """
     try:
+        logging.info(f"Initializing {n_gram}-gram model...")
+
         logging.info("Loading data...")
         # Load the parsed data with features
         sl = SaveAndLoadParquet()
@@ -105,8 +134,8 @@ def run_ngram_model():
         # report_lookup = dict(zip(train_df['study_id'], train_df['findings']))
         
         # Prepare test set generation
-        test_study_ids = test_df['study_id'].values
-        train_study_ids = train_df['study_id'].values
+        # test_study_ids = test_df['study_id'].values
+        # train_study_ids = train_df['study_id'].values
 
         # Compute similarities once for all test samples
         logging.info("Computing similarities...")
@@ -133,24 +162,24 @@ def run_ngram_model():
         #         'generated_report': generated_report
         #     })
         predictions = []
-        for i in tqdm(range(len(test_features)), desc="Generating reports"):
+        for i in tqdm(range(len(test_features)), desc=f"Generating {n_gram}-gram reports"):    
             # Get neighbor indices and reports
             neighbors = neighbor_indices[i]
-            neighbor_reports = [train_reports[idx] for idx in neighbors]
+            neighbor_reports = [train_reports[idx] for idx in neighbors if isinstance(train_reports[idx], str)]
             
             # Train n-gram model on neighbors' reports
-            ngram_model = ConditionalNGramModel(n=N_GRAM)
+            ngram_model = ConditionalNGramModel(n=n_gram)
             ngram_model.train(neighbor_reports)
             
             # Generate report
             generated_report = ngram_model.generate(max_length=100)
             
             predictions.append({
-                'study_id': test_study_ids[i],
+                'study_id': test_df['study_id'].iloc[i],
                 'true_report': test_df['findings'].iloc[i],
                 'pred_report': generated_report,
                 'neighbor_indices': neighbors,
-                'similarity_score': sim_matrix[i, neighbors[0]]  # Score with top neighbor
+                'similarity_score': sim_matrix[i, neighbors[0]] # Score with top neighbor
             })
 
         # # Convert to DataFrame and save
@@ -158,25 +187,24 @@ def run_ngram_model():
 
         # Convert to DataFrame
         results_df = pd.DataFrame(predictions)
-        
-        # Save results in same format as nearest_neighbor.py
         Path(OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
         
         # 1. Parquet (main format)
-        results_df.to_parquet(f"{OUTPUT_DIR}/predictions.parquet")
+        output_path = f"{OUTPUT_DIR}/{n_gram}gram_predictions.parquet"
+        results_df.to_parquet(output_path)
+        logging.info(f"Saved predictions to {output_path}")
 
         # # Save results
         # Path(OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
         # output_path = os.path.join(OUTPUT_DIR, f"{N_GRAM}-gram.tsv")
         # results_df.to_csv(output_path, sep='\t', index=False)
-        
-        logging.info(f"Saved predictions to {OUTPUT_DIR}/predictions.parquet")
-        # logging.info(f"Saved generated reports to {output_path}")
-        logging.info("N-gram model completed successfully")
+        logging.info(f"{n_gram}-gram model completed successfully")
         
     except Exception as e:
         logging.error(f"Error in n-gram model: {str(e)}", exc_info=True)
         raise
 
 if __name__ == "__main__":
-    run_ngram_model()
+    # Run all n-gram versions (1, 2, and 3)
+    for n in [1, 2, 3]:
+        run_ngram_model(n_gram=n)
