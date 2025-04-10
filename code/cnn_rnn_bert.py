@@ -36,7 +36,7 @@ tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 VOCAB_SIZE = tokenizer.vocab_size
 
 # Check GPU availability
-tf.config.list_physical_devices('GPU')
+print("Num GPUs Available: ", len(tf.config.list_physical_devices('GPU')))
 
 class ImageEncoder(tf.keras.layers.Layer):
     """Encoder with pre-extracted pooled_features"""
