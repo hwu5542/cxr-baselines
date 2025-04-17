@@ -401,3 +401,23 @@ UnboundLocalError: local variable 'parsed_df' referenced before assignment
 2025-04-08 11:24:42,436 - INFO - [Saving Data] Saving to D:/mimic/processed\test.parquet...
 2025-04-08 11:24:45,627 - INFO - [Saving Data] Saved 2259 items to D:/mimic/processed\test.parquet
 2025-04-08 11:25:06,419 - INFO - [Saving Data] Data processing completed successfully
+2025-04-13 12:01:54,844 - INFO - [Building Mapping] Scanning 65371 patient directories...
+2025-04-13 12:04:19,431 - INFO - [Building Mapping] Built mapping for 17395 DICOM-report pairs
+2025-04-13 12:04:19,490 - INFO - [Loading Data] Processing 17395 items...
+2025-04-13 12:09:18,129 - INFO - [Loading Data] Processed 2000 items
+2025-04-13 12:15:21,230 - INFO - [Loading Data] Processed 4000 items
+2025-04-13 12:20:05,401 - INFO - [Loading Data] Processed 6000 items
+2025-04-13 12:24:45,211 - INFO - [Loading Data] Processed 8000 items
+2025-04-13 12:29:26,670 - INFO - [Loading Data] Processed 10000 items
+2025-04-13 12:34:03,134 - INFO - [Loading Data] Processed 12000 items
+2025-04-13 12:38:23,237 - INFO - [Loading Data] Processed 14000 items
+2025-04-13 12:42:40,903 - INFO - [Loading Data] Processed 16000 items
+2025-04-13 12:45:42,998 - INFO - [Loading Data] Error processing D:\mimic\physionet.org\files\mimic-cxr\2.1.0\files\p10\p10476869\s56339433\4a9e3635-37b9776d-3eb1611d-ccdb1f6d-044a43b1.dcm: The length of the pixel data in the dataset (7664416 bytes) doesn't match the expected length (15548928 bytes). The dataset may be corrupted or there may be an issue with the pixel data handler.
+2025-04-13 12:45:43,000 - INFO - [Loading Data] Completed: 17394 successes, 1 errors
+2025-04-13 12:45:43,077 - INFO - [Splitting Data] Splitting 3059 patients...
+2025-04-13 12:45:43,348 - INFO - [Splitting Data] Split complete: 14061 training, 3333 test items
+2025-04-13 12:45:43,350 - INFO - [Saving Data] Saving to D:/mimic/processed\train.parquet...
+2025-04-13 12:46:03,225 - INFO - [Saving Data] Saved 14061 items to D:/mimic/processed\train.parquet
+2025-04-13 12:46:03,227 - INFO - [Saving Data] Saving to D:/mimic/processed\test.parquet...
+2025-04-13 12:46:07,857 - INFO - [Saving Data] Saved 3333 items to D:/mimic/processed\test.parquet
+2025-04-13 12:46:29,350 - INFO - [Saving Data] Data processing completed successfully
