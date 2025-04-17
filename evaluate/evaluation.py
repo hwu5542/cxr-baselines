@@ -6,8 +6,8 @@ from evaluate_nlg import evaluate_nlg_metrics
 import os
 
 # Configuration
-INPUT_DIR = Path("D:/mimic/outputs")
-EVAL_DIR = Path("D:/mimic/evaluation")
+INPUT_DIR = Path("./outputs")
+EVAL_DIR = Path("./evaluation")
 MODELS = ["1nn", "cnn_rnn_bert", "ngram", "random"]
 
 def load_predictions(model_dir: Path):
