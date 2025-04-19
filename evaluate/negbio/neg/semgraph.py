@@ -23,7 +23,7 @@ def load(sentence):
     """
     graph = nx.DiGraph()
     for ann in sentence.annotations:
-        loc = ann.get_total_location()
+        loc = ann.total_span
         graph.add_node(ann.id, tag=ann.infons['tag'], text=ann.text, lemma=ann.infons['lemma'].lower(),
                        start=loc.offset, end=loc.offset + loc.length)
     for rel in sentence.relations:
@@ -60,14 +60,14 @@ def has_out(graph, node, lemmas, dependencies):
 
 def get_out(graph, node, lemmas, dependencies):
     for _, c, d in graph.out_edges(node, data=True):
-        if d['dependency'] in dependencies and graph.node[c]['lemma'] in lemmas:
+        if d['dependency'] in dependencies and graph.nodes[c]['lemma'] in lemmas:
             return c
     return None
 
 
 def get_in(graph, node, lemmas, dependencies):
     for p, _, d in graph.in_edges(node, data=True):
-        if d['dependency'] in dependencies and graph.node[p]['lemma'] in lemmas:
+        if d['dependency'] in dependencies and graph.nodes[p]['lemma'] in lemmas:
             return p
     return None
 
@@ -78,13 +78,13 @@ def has_in(graph, node, lemmas, dependencies):
 
 def has_out_node(graph, node, lemmas):
     for child in graph.successors(node):
-        if graph.node[child]['lemma'] in lemmas:
+        if graph.nodes[child]['lemma'] in lemmas:
             return True
     return False
 
 
 def has_in_node(graph, node, lemmas):
     for child in graph.predecessors(node):
-        if graph.node[child]['lemma'] in lemmas:
+        if graph.nodes[child]['lemma'] in lemmas:
             return True
     return False

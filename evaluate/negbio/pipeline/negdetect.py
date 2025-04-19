@@ -1,5 +1,6 @@
 import logging
 import re
+import traceback
 
 from negbio.neg.neg_detector import Detector
 
@@ -31,7 +32,7 @@ def is_neg_regex(text):
 def _mark_anns(annotations, begin, end, type):
     """Mark all annotations in [begin:end] as type"""
     for ann in annotations:
-        total_loc = ann.get_total_location()
+        total_loc = ann.total_span
         if begin <= total_loc.offset and total_loc.offset + total_loc.length <= end:
             ann.infons[type] = 'True'
 
@@ -72,7 +73,7 @@ def detect(document, detector):
 
             locs = []
             for ann in passage.annotations:
-                total_loc = ann.get_total_location()
+                total_loc = ann.total_span
                 locs.append((total_loc.offset, total_loc.offset + total_loc.length))
 
             for sentence in passage.sentences:
@@ -88,4 +89,5 @@ def detect(document, detector):
         # _extend(document, Detector.UNCERTAINTY)
     except:
         logging.exception("Cannot process %s", document.id)
+        traceback.print_exc()
     return document

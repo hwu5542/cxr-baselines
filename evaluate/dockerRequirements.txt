@@ -8,3 +8,5 @@ bioc
 nltk
 networkx
 ply
+fastparquet
+pyarrow

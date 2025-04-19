@@ -1,4 +1,3 @@
-import csv
 import pandas as pd
 import os
 import random
@@ -6,19 +5,13 @@ from pathlib import Path
 from loader import Loader
 from stages import Extractor, Classifier, Aggregator
 
-def evaluate_chexpert(predictions_df: pd.DataFrame, output_dir: str):
+def evaluate_chexpert():
     """Evaluate generated reports using CheXpert labeler
     
     Args:
         predictions_df: DataFrame containing 'study_id', 'true_report', 'pred_report'
         output_dir: Directory to save evaluation results
     """
-    # Create output directory
-    Path(output_dir).mkdir(parents=True, exist_ok=True)
-    
-    # Write reports to temporary file
-    tempname = f'/tmp/chexpert-reports-{random.randint(0,10**6)}.csv'
-    predictions_df['pred_report'].to_csv(tempname, index=False, header=False, quoting=csv.QUOTE_ALL)
     
     # Initialize CheXpert components
     extractor = Extractor(
@@ -42,16 +35,6 @@ def evaluate_chexpert(predictions_df: pd.DataFrame, output_dir: str):
     ]
     
     aggregator = Aggregator(CATEGORIES, False)
-    
-    # Process reports
-    loader = Loader(tempname, False, False)
-    loader.load()
-    extractor.extract(loader.collection)
-    classifier.classify(loader.collection)
-    labels = aggregator.aggregate(loader.collection)
-    
-    # Save results
-    labels.to_csv(f"{output_dir}/chexpert_labels.csv", index=False)
-    
-    # Clean up
-    os.remove(tempname)
+
+if __name__ == "__main__":
+    evaluate_chexpert()
