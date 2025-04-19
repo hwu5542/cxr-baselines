@@ -1,23 +1,37 @@
 # cxr-baselines
 Baselines for generating radiology reports on the MIMIC-CXR chest x-ray dataset.
 
+Instruction for Windows 11:
+    1. Create mimic folder in D:\
+    2. Copy wget.exe in the mimic directory
+    3. Open powershell and run command: wget.exe -r -N -c -np --user wuho --ask-password https://physionet.org/files/mimic-cxr/2.1.0/
+    4. Clone the git repo and go to code folder
+    5. Run python load_and_preprocess_data_observable.py
+        (For testing mode, run python load_and_preprocess_data_observable.py numberOfRecordToRun)
+    6.
+
 Use
 
-    $ ssh -L 8095:localhost:8095 night    # for various values of 8095 
+Load and Preprocess Data:
 
-    $ cd /scratch/wboag/2019/cxr/cxr-baselines
+    python load_and_preprocess_data_observable.py
 
-    $ . venv/bin/activate
+Evaluation:
 
-    $ ipython notebook --no-browser --port=8095
+Powershell:
     
+    .\rebuild.ps1
+
+Bash
+
+    .\rebuild.sh
+
+Test Run
+
+    python3 evaluation.py NumberOfRecordToRun the test
     
-    Overview
-    
-        build_similarities_matrix.ipynb 
-            - load the image embeddings, and create img_id -> [img_id] top-100 nearest neighbors
-            - /crimea/wboag/2019/cxr/camera_ready_top100.pkl
-            
-            
+Actual Run
+
+    python3 evaluation.py
             
             
