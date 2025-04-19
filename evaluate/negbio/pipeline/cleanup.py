@@ -14,7 +14,7 @@ def clean_sentences(document, sort_anns=False):
             del passage.sentences[:]
 
         if sort_anns:
-            key_func = lambda ann: ann.get_total_location().offset
+            key_func = lambda ann: ann.total_span.offset
             id = 0
             for passage in document.passages:
                 for ann in sorted(passage.annotations, key=key_func):
