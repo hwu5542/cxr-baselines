@@ -18,11 +18,6 @@ class Bllip(object):
         return cls._instance
     
     def __init__(self, model_dir=None):
-        # test print
-        print(tempfile.gettempdir())
-        print(model_dir)
-        print('test')
-
         if not self._initialized:
             self._initialized = True
             

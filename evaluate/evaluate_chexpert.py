@@ -51,11 +51,14 @@ def evaluate_chexpert(predictions_df: pd.DataFrame, output_dir: str):
     classifier.classify(loader.collection)
     labels = aggregator.aggregate(loader.collection)
     
-        # Save results
+    # Save results
     if isinstance(labels, np.ndarray):
         labels_df = pd.DataFrame(labels, columns=CATEGORIES)
     else:
         labels_df = labels  # assuming it's already a DataFrame
     
+    # Save results
+    labels_df.to_csv(f"{output_dir}/chexpert_labels.csv", index=False)
+
     # Clean up
     os.remove(tempname)
