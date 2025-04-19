@@ -7,3 +7,6 @@ docker build -t report-evaluator .
 
 # Remove dangling images
 docker image prune -f
+
+# start container
+docker run -v C:\Work\Bash\sp25_cs598DLH\cxr-baselines\evaluate:/evaluate/output -it --name my_container report-evaluator /bin/bash
