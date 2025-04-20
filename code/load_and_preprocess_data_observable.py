@@ -187,7 +187,7 @@ if __name__ == "__main__":
 
     if len(sys.argv) > 1:
         # Test Mode On
-        processor = ObservableDataProcessor(test_mode=True, test_size= sys.argv[1:][0])
+        processor = ObservableDataProcessor(test_mode=True, test_size= sys.argv[0])
     else:
         # Regular Run
         processor = ObservableDataProcessor()

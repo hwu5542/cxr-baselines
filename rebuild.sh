@@ -9,4 +9,4 @@ docker build -t report-evaluator .
 docker image prune -f
 
 # start container
-docker run -v C:\Work\Bash\sp25_cs598DLH\cxr-baselines\evaluate:/evaluate/output -it --name my_container report-evaluator /bin/bash
+docker run -v C:\Work\Bash\sp25_cs598DLH\cxr-baselines\evaluate\output:/evaluate/output -it --name my_container report-evaluator /bin/bash

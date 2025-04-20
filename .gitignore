@@ -2,8 +2,5 @@
 __pycache__/
 venv_cxr/
 *.log
-code/bllipparser/
-code/constants/
-code/loader/
-code/negbio/
-code/stages/
+evaluate/output
+evaluate/input

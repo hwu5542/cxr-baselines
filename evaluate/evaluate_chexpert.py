@@ -1,4 +1,5 @@
 import csv
+import numpy as np
 import pandas as pd
 import os
 import random
@@ -51,7 +52,13 @@ def evaluate_chexpert(predictions_df: pd.DataFrame, output_dir: str):
     labels = aggregator.aggregate(loader.collection)
     
     # Save results
-    labels.to_csv(f"{output_dir}/chexpert_labels.csv", index=False)
+    if isinstance(labels, np.ndarray):
+        labels_df = pd.DataFrame(labels, columns=CATEGORIES)
+    else:
+        labels_df = labels  # assuming it's already a DataFrame
     
+    # Save results
+    labels_df.to_csv(f"{output_dir}/chexpert_labels.csv", index=False)
+
     # Clean up
     os.remove(tempname)

@@ -1,4 +1,5 @@
 # evaluate_all.py
+import sys
 import pandas as pd
 from pathlib import Path
 from evaluate_chexpert import evaluate_chexpert
@@ -26,6 +27,13 @@ def load_predictions(model_dir: Path):
 def run_evaluations():
     # Create evaluation directory if not exists
     EVAL_DIR.mkdir(parents=True, exist_ok=True)
+
+    if len(sys.argv) > 1:
+        # Test Mode On
+        test_size = int(sys.argv[1])
+    else:
+        # Regular Run
+        test_size = 0
     
     # Load all model predictions
     for model in MODELS:
@@ -42,9 +50,12 @@ def run_evaluations():
             output_subdir.mkdir(parents=True, exist_ok=True)
             
             # Prepare reference reports (true reports)
-            references = pred_df[['study_id', 'true_report']].copy()
+            if (test_size > 0):
+                pred_df = pred_df.head(test_size)
+                
             # references.rename(columns={'true_report': 'text'}, inplace=True)
-            
+            references = pred_df[['study_id', 'true_report']].copy()
+
             # Run NLG evaluation (BLEU, CIDEr)
             evaluate_nlg_metrics(
                 predictions_df=pred_df,
