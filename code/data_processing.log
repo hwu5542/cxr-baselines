@@ -421,3 +421,33 @@ UnboundLocalError: local variable 'parsed_df' referenced before assignment
 2025-04-13 12:46:03,227 - INFO - [Saving Data] Saving to D:/mimic/processed\test.parquet...
 2025-04-13 12:46:07,857 - INFO - [Saving Data] Saved 3333 items to D:/mimic/processed\test.parquet
 2025-04-13 12:46:29,350 - INFO - [Saving Data] Data processing completed successfully
+2025-04-26 21:16:03,463 - INFO - [Building Mapping] Scanning 65388 patient directories...
+2025-04-26 21:18:04,338 - INFO - [Building Mapping] Built mapping for 37672 DICOM-report pairs
+2025-04-26 21:18:04,394 - INFO - [Loading Data] Processing 37672 items...
+2025-04-26 21:22:55,831 - INFO - [Loading Data] Processed 2000 items
+2025-04-26 21:27:37,004 - INFO - [Loading Data] Processed 4000 items
+2025-04-26 21:32:13,076 - INFO - [Loading Data] Processed 6000 items
+2025-04-26 21:36:54,814 - INFO - [Loading Data] Processed 8000 items
+2025-04-26 21:41:40,404 - INFO - [Loading Data] Processed 10000 items
+2025-04-26 21:46:23,721 - INFO - [Loading Data] Processed 12000 items
+2025-04-26 21:51:13,532 - INFO - [Loading Data] Processed 14000 items
+2025-04-26 21:56:00,466 - INFO - [Loading Data] Processed 16000 items
+2025-04-26 22:00:50,542 - INFO - [Loading Data] Processed 18000 items
+2025-04-26 22:05:36,371 - INFO - [Loading Data] Processed 20000 items
+2025-04-26 22:10:29,904 - INFO - [Loading Data] Processed 22000 items
+2025-04-26 22:15:21,938 - INFO - [Loading Data] Processed 24000 items
+2025-04-26 22:20:18,224 - INFO - [Loading Data] Processed 26000 items
+2025-04-26 22:25:10,491 - INFO - [Loading Data] Processed 28000 items
+2025-04-26 22:30:05,371 - INFO - [Loading Data] Processed 30000 items
+2025-04-26 22:34:54,660 - INFO - [Loading Data] Processed 32000 items
+2025-04-26 22:39:49,385 - INFO - [Loading Data] Processed 34000 items
+2025-04-26 22:44:48,117 - INFO - [Loading Data] Processed 36000 items
+2025-04-26 22:48:53,452 - INFO - [Loading Data] Error processing D:\mimic\physionet.org\files\mimic-cxr\2.1.0\files\p11\p11030109\s59100613\c637199c-162ff6cc-470e81fc-33a760ac-e76da78d.dcm: The length of the pixel data in the dataset (1979250 bytes) doesn't match the expected length (15548928 bytes). The dataset may be corrupted or there may be an issue with the pixel data handler.
+2025-04-26 22:48:53,455 - INFO - [Loading Data] Completed: 37671 successes, 1 errors
+2025-04-26 22:48:53,754 - INFO - [Splitting Data] Splitting 6588 patients...
+2025-04-26 22:48:55,066 - INFO - [Splitting Data] Split complete: 29870 training, 7801 test items
+2025-04-26 22:48:55,074 - INFO - [Saving Data] Saving to D:/mimic/processed\train.parquet...
+2025-04-26 22:51:02,606 - INFO - [Saving Data] Saved 29870 items to D:/mimic/processed\train.parquet
+2025-04-26 22:51:02,618 - INFO - [Saving Data] Saving to D:/mimic/processed\test.parquet...
+2025-04-26 22:51:17,778 - INFO - [Saving Data] Saved 7801 items to D:/mimic/processed\test.parquet
+2025-04-26 22:53:04,517 - INFO - [Saving Data] Data processing completed successfully
