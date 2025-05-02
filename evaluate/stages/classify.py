@@ -1,5 +1,7 @@
 """Define mention classifier class."""
+
 import logging
+import time
 from pathlib import Path
 from negbio.pipeline import parse, ptb2ud, negdetect
 from negbio.neg import semgraph, propagator, neg_detector
@@ -14,12 +16,16 @@ class ModifiedDetector(neg_detector.Detector):
 
     Overrides parent methods __init__, detect, and match_uncertainty.
     """
-    def __init__(self, pre_negation_uncertainty_path,
-                 negation_path, post_negation_uncertainty_path):
+
+    def __init__(
+        self,
+        pre_negation_uncertainty_path,
+        negation_path,
+        post_negation_uncertainty_path,
+    ):
         self.neg_patterns = ngrex.load(negation_path)
         self.uncertain_patterns = ngrex.load(post_negation_uncertainty_path)
-        self.preneg_uncertain_patterns\
-            = ngrex.load(pre_negation_uncertainty_path)
+        self.preneg_uncertain_patterns = ngrex.load(pre_negation_uncertainty_path)
 
     def detect(self, sentence, locs):
         """Detect rules in report sentences.
@@ -38,8 +44,9 @@ class ModifiedDetector(neg_detector.Detector):
             g = semgraph.load(sentence)
             propagator.propagate(g)
         except Exception:
-            logger.exception('Cannot parse dependency graph ' +
-                             f'[offset={sentence.offset}]')
+            logger.exception(
+                "Cannot parse dependency graph " + f"[offset={sentence.offset}]"
+            )
             raise
         else:
             for loc in locs:
@@ -76,17 +83,23 @@ class ModifiedDetector(neg_detector.Detector):
 
 class Classifier(object):
     """Classify mentions of observations from radiology reports."""
-    def __init__(self, pre_negation_uncertainty_path, negation_path,
-                 post_negation_uncertainty_path, verbose=False):
+
+    def __init__(
+        self,
+        pre_negation_uncertainty_path,
+        negation_path,
+        post_negation_uncertainty_path,
+        verbose=False,
+    ):
         self.parser = parse.NegBioParser(model_dir=PARSING_MODEL_DIR)
         lemmatizer = ptb2ud.Lemmatizer()
         self.ptb2dep = ptb2ud.NegBioPtb2DepConverter(lemmatizer, universal=True)
 
         self.verbose = verbose
 
-        self.detector = ModifiedDetector(pre_negation_uncertainty_path,
-                                         negation_path,
-                                         post_negation_uncertainty_path)
+        self.detector = ModifiedDetector(
+            pre_negation_uncertainty_path, negation_path, post_negation_uncertainty_path
+        )
 
     def classify(self, collection):
         """Classify each mention into one of
@@ -97,10 +110,14 @@ class Classifier(object):
             documents = tqdm(documents)
         for document in documents:
             # Parse the impression text in place.
+            print("before parse_do: ", time.time())
             self.parser.parse_doc(document)
+            print("before convert_doc: ", time.time())
             # Add the universal dependency graph in place.
             self.ptb2dep.convert_doc(document)
+            print("before detect: ", time.time())
             # Detect the negation and uncertainty rules in place.
             negdetect.detect(document, self.detector)
+            print("after detect: ", time.time())
             # To reduce memory consumption, remove sentences text.
             del document.passages[0].sentences[:]

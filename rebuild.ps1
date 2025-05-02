@@ -15,4 +15,5 @@ docker image prune -f
 
 Write-Host "Done!" -ForegroundColor Green
 
-docker run -v C:\Work\Bash\sp25_cs598DLH\cxr-baselines\evaluate\output:/evaluate/output -it --name my_container report-evaluator /bin/bash
+# docker run -v C:\Work\Bash\sp25_cs598DLH\cxr-baselines\evaluate\output:/evaluate/output -it --name my_container report-evaluator /bin/bash
+docker run --gpus all -v C:\Work\Bash\sp25_cs598DLH\cxr-baselines\evaluate\output:/evaluate/output -it --name my_container report-evaluator /bin/bash

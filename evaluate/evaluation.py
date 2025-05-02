@@ -48,18 +48,21 @@ def run_evaluations():
     # Create evaluation directory if not exists
     EVAL_DIR.mkdir(parents=True, exist_ok=True)
 
+    model_num = None
+    model_sub = None
+    test_size = 0
+
     if len(sys.argv) > 2:
+        # partition mode
         model_num = int(sys.argv[1])
         model_sub = int(sys.argv[2])
-    if len(sys.argv) > 1:
+    elif len(sys.argv) > 1:
         # Test Mode On
         test_size = int(sys.argv[1])
-    else:
-        # Regular Run
-        test_size = 0
 
     # Load all model predictions
     for index, model in enumerate(MODELS):
+        print(index, model_num)
         model_dir = INPUT_DIR / model
         if not model_dir.exists():
             continue
