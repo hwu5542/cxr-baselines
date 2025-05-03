@@ -1,12 +1,20 @@
-pandas>=1.3.0
+# pandas>=1.3.0
 pycocoevalcap>=1.0
 numpy>=1.21.0
 pathlib2
 PyStanfordDependencies
 bllipparser
 bioc
-nltk
+# nltk
 networkx
 ply
 fastparquet
 pyarrow
+torch==2.0.1
+transformers==4.30.0
+torchmetrics==0.11.0
+sentence-transformers==2.2.2
+cupy-cuda11x==12.0.0
+nltk==3.8.1
+pandas==1.5.3
+memory_profiler

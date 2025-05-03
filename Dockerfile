@@ -1,5 +1,5 @@
-# Use a base image that includes necessary tools like build-essential for C++
-FROM ubuntu:latest
+# Use NVIDIA CUDA base image
+FROM nvidia/cuda:11.8.0-runtime-ubuntu22.04
 
 RUN mkdir /evaluate
 
@@ -15,6 +15,7 @@ RUN apt-get update && \
     swig \
     wget \
     unzip \
+    git \
     openjdk-11-jdk && \ 
     rm -rf /var/lib/apt/lists/*
 
@@ -32,13 +33,13 @@ COPY evaluate/dockerRequirements.txt /evaluate/dockerRequirements.txt
 
 RUN python3 -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
-RUN pip install -r dockerRequirements.txt
+RUN pip install --no-cache-dir -r dockerRequirements.txt
+RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 
 RUN python3 -m nltk.downloader universal_tagset wordnet punkt punkt_tab
 
 COPY evaluate/ ./
-
-CMD ["python3", "evaluation.py"]
+ENV CUDA_VISIBLE_DEVICES=0
 # Commands
 # Remove dangling images (optional but recommended)
 # docker image prune -f
