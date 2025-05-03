@@ -1,7 +1,6 @@
 """Define mention classifier class."""
 
 import logging
-import time
 from pathlib import Path
 from negbio.pipeline import parse, ptb2ud, negdetect
 from negbio.neg import semgraph, propagator, neg_detector
@@ -110,14 +109,10 @@ class Classifier(object):
             documents = tqdm(documents)
         for document in documents:
             # Parse the impression text in place.
-            print("before parse_do: ", time.time())
             self.parser.parse_doc(document)
-            print("before convert_doc: ", time.time())
             # Add the universal dependency graph in place.
             self.ptb2dep.convert_doc(document)
-            print("before detect: ", time.time())
             # Detect the negation and uncertainty rules in place.
             negdetect.detect(document, self.detector)
-            print("after detect: ", time.time())
             # To reduce memory consumption, remove sentences text.
             del document.passages[0].sentences[:]

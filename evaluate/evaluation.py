@@ -48,8 +48,8 @@ def run_evaluations():
     # Create evaluation directory if not exists
     EVAL_DIR.mkdir(parents=True, exist_ok=True)
 
-    model_num = None
-    model_sub = None
+    model_num = -1
+    model_sub = -1
     test_size = 0
 
     if len(sys.argv) > 2:
@@ -62,12 +62,11 @@ def run_evaluations():
 
     # Load all model predictions
     for index, model in enumerate(MODELS):
-        print(index, model_num)
         model_dir = INPUT_DIR / model
         if not model_dir.exists():
             continue
 
-        if model_num and model_num != index:
+        if model_num > -1 and model_num != index:
             continue
 
         print(f"\nEvaluating model: {model}")
