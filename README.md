@@ -10,9 +10,10 @@ Instruction for Windows 11:<br/>
 ```
 wget.exe -r -N -c -np --user <USERNAME> --ask-password https://physionet.org/files/mimic-cxr/2.1.0/
 ```
-4. Update GPU Driver, then install Cuda toolkit and cuDNN <br/>
+4. Update GPU Driver, then install Cuda toolkit, cuDNN and tensorflow <br/>
 - https://developer.nvidia.com/cuda-downloads <br/>
 - https://developer.nvidia.com/cudnn-downloads <br/>
+- https://www.tensorflow.org/install <br/>
 5. Clone the git repo, install requirements and go to code folder <br/>
 ```
 git clone https://github.com/hwu5542/cxr-baselines.git
