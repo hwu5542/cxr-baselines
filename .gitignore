@@ -2,5 +2,6 @@
 __pycache__/
 venv_cxr/
 *.log
+*.csv
 evaluate/output
 evaluate/input

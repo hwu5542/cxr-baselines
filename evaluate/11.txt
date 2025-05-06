@@ -5,7 +5,7 @@ from sklearn.metrics import accuracy_score, precision_score, f1_score
 import numpy as np
 
 # Configuration
-EVAL_DIR = Path("./evaluate/output")
+EVAL_DIR = Path("./output")
 MODELS = ["1nn", "cnn_rnn_bert", "ngram", "random"]
 OUTPUT_FILE = "final_results.csv"
 F1_TABLE_FILE = "f1_scores_table.csv"
@@ -33,10 +33,6 @@ def calculate_per_class_f1(true_labels, pred_labels, categories):
     # Convert to binary (1 for present, 0 for absent/not mentioned)
     true_binary = (true_labels == 1).astype(int)
     pred_binary = (pred_labels == 1).astype(int)
-
-    # adding the model and variant in first and second columns
-    results["Model"] = None
-    results["Variant"] = None
 
     # Calculate per-class F1
     for i, category in enumerate(categories):
@@ -111,9 +107,12 @@ def aggregate_results():
             )
 
             # Store F1 scores for the detailed table
-            f1_scores["Model"] = model
-            f1_scores["Variant"] = variant
-            f1_scores_data.append(f1_scores)
+            f1_entry = {
+                "Model": model,
+                "Variant": variant,
+                **f1_scores
+            }
+            f1_scores_data.append(f1_entry)
 
             # Combine results for main table
             result = {
@@ -130,8 +129,11 @@ def aggregate_results():
     results_df.replace(0, "< 0.001", inplace=True)
     results_df.to_csv(OUTPUT_FILE, index=False)
 
-    # Create and save F1 scores table
+    # Create and save F1 scores table with Model and Variant first
     f1_df = pd.DataFrame(f1_scores_data)
+    # Reorder columns to have Model and Variant first
+    columns = ['Model', 'Variant'] + [col for col in f1_df.columns if col not in ['Model', 'Variant']]
+    f1_df = f1_df[columns]
     f1_df = f1_df.round(3)
     f1_df.replace(0, "< 0.001", inplace=True)
     f1_df.to_csv(F1_TABLE_FILE, index=False)

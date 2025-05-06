@@ -1,0 +1,1 @@
+tree "C:\Work\Bash\sp25_cs598DLH\cxr-baselines\evaluate\output" /f | Select-Object -Skip 2
