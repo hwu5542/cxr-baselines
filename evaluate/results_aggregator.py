@@ -5,7 +5,7 @@ from sklearn.metrics import accuracy_score, precision_score, f1_score
 import numpy as np
 
 # Configuration
-EVAL_DIR = Path("./output")
+EVAL_DIR = Path("./evaluate/output")
 MODELS = ["1nn", "cnn_rnn_bert", "ngram", "random"]
 OUTPUT_FILE = "final_results.csv"
 F1_TABLE_FILE = "f1_scores_table.csv"
@@ -14,8 +14,6 @@ F1_TABLE_FILE = "f1_scores_table.csv"
 def calculate_chexpert_metrics(true_labels, pred_labels):
     """Calculate accuracy, precision, and F1 for CheXpert results"""
     # Convert to binary classification (1 if any finding, 0 if No Finding)
-    # true_binary = (true_labels.iloc[:, :-1] != "No Finding").any(axis=1).astype(int)
-    # pred_binary = (pred_labels.iloc[:, :-1] != "No Finding").any(axis=1).astype(int)
     true_binary = (true_labels.drop("No Finding", axis=1) == 1).any(axis=1).astype(int)
     pred_binary = (pred_labels.drop("No Finding", axis=1) == 1).any(axis=1).astype(int)
 
@@ -35,6 +33,10 @@ def calculate_per_class_f1(true_labels, pred_labels, categories):
     # Convert to binary (1 for present, 0 for absent/not mentioned)
     true_binary = (true_labels == 1).astype(int)
     pred_binary = (pred_labels == 1).astype(int)
+
+    # adding the model and variant in first and second columns
+    results["Model"] = None
+    results["Variant"] = None
 
     # Calculate per-class F1
     for i, category in enumerate(categories):
@@ -97,9 +99,8 @@ def aggregate_results():
                 }
 
             # Load CheXpert labels
-            # Calculate metrics by comparing true vs predicted labels
-            true_labels = pd.read_csv(f"{variant_dir}/chexpert_true_labels.csv")
-            pred_labels = pd.read_csv(f"{variant_dir}/chexpert_labels.csv")
+            true_labels = pd.read_csv(variant_dir / "chexpert_labels_true.csv")
+            pred_labels = pd.read_csv(variant_dir / "chexpert_labels.csv")
 
             # Calculate overall metrics
             chexpert_metrics = calculate_chexpert_metrics(true_labels, pred_labels)
@@ -125,20 +126,6 @@ def aggregate_results():
 
     # Create and save main results table
     results_df = pd.DataFrame(all_results)
-    results_df = results_df[
-        [
-            "Model",
-            "Variant",
-            "bleu_1",
-            "bleu_2",
-            "bleu_3",
-            "bleu_4",
-            "cider",
-            "CheXpert Accuracy",
-            "CheXpert Precision",
-            "CheXpert F1",
-        ]
-    ]
     results_df = results_df.round(3)
     results_df.replace(0, "< 0.001", inplace=True)
     results_df.to_csv(OUTPUT_FILE, index=False)

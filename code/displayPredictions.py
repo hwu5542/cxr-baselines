@@ -60,5 +60,5 @@ class DisplayPredictions:
 
 if __name__ == "__main__":
     display = DisplayPredictions()
-    # display.displayPredictions()
     display.displayDataset()
+    display.displayPredictions()
