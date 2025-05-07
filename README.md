@@ -4,6 +4,9 @@ Baselines for generating radiology reports on the MIMIC-CXR chest x-ray dataset.
 Since I ran the program in Windows 11, the instruction is created using windows system.
 For linux and mac, please convert the instructions to fit your system accordingly
 
+Link to the Reproduction Article: [Reproducing and Analyzing Baselines for Chest X-Ray Report Generation:
+Insights and Challenges](https://github.com/hwu5542/cxr-baselines/blob/master/RaABfCXRGIaC.pdf)
+
 Instruction for Windows 11:<br/>
 
 1. Create mimic folder in D:\ (change D:\ to other disk in code if necessary) <br/>
