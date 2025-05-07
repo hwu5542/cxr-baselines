@@ -12,6 +12,7 @@ train_path = "D:/mimic/processed/parsed_train.parquet"
 test_path = "D:/mimic/processed/parsed_test.parquet"
 MODELS = ["1nn", "cnn_rnn_bert", "ngram", "random"]
 display = None
+SAMPLE_FILE = "pased_train_sample.csv"
 
 
 class DisplayPredictions:
@@ -31,6 +32,21 @@ class DisplayPredictions:
             # Single prediction file models
             return {"default": pd.read_parquet(model_dir / "predictions.parquet")}
 
+    def displayDataset(self):
+        # Initialize data loader
+        sl = SaveAndLoadParquet()
+        # Load preprocessed data
+        print("Loading data...")
+        train_df = sl.load_from_parquet(train_path)
+        test_df = sl.load_from_parquet(test_path)
+
+        print(f"Train samples size: {len(train_df)}")
+        print(f"Test samples size: {len(test_df)}")
+
+        print("Train samples:")
+        print(train_df.head(5))
+        train_df.head(5).to_csv(SAMPLE_FILE, index=False)
+
     def displayPredictions(self):
 
         for index, model in enumerate(MODELS):
@@ -45,17 +61,6 @@ class DisplayPredictions:
                 print(f"  Printing variant: {variant}")
                 print(pred_df.columns.to_list())
                 print(pred_df[["true_report", "pred_report"]].head())
-
-    def displayDataset(self):
-        # Initialize data loader
-        sl = SaveAndLoadParquet()
-        # Load preprocessed data
-        print("Loading data...")
-        train_df = sl.load_from_parquet(train_path)
-        test_df = sl.load_from_parquet(test_path)
-
-        print(f"Train samples: {len(train_df)}")
-        print(f"Test samples: {len(test_df)}")
 
 
 if __name__ == "__main__":
